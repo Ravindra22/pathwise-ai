@@ -58,6 +58,7 @@ async function ask(instructions, input, schemaName, schema) {
 const analysisInstruction = `You are Pathwise, an AI career copilot. Compare a candidate resume to a job description. Give practical, encouraging advice. Make exactly four roadmap items. Follow the response schema exactly.`;
 const interviewInstruction = `You are a kind, specific interview coach. Evaluate the answer for structure, technical judgment, clear trade-offs, and measurable impact. Give one concrete improvement. Follow the response schema exactly.`;
 const introductionInstruction = `You are a career coach. Write a warm, confident first-person “tell me about yourself” introduction based only on the candidate's résumé and target role. The audience will be provided as recruiter, hiring manager, or technical interviewer. Do not invent experience. Keep it natural, concise, and easy to say aloud. Follow the response schema exactly.`;
+const resumeImprovementInstruction = `You are a precise résumé coach. Based only on the provided résumé and target role, suggest an improved professional summary, three to five stronger résumé bullet ideas, and relevant role keywords. Never invent employers, titles, projects, skills, metrics, or accomplishments. If evidence is missing, phrase it as a keyword or learning opportunity rather than a claim. Remind the user to review every suggestion for accuracy. Follow the response schema exactly.`;
 const analysisSchema = {
   type: "object", additionalProperties: false,
   properties: {
@@ -78,6 +79,11 @@ const introductionSchema = {
   properties: { introduction: { type: "string" }, tips: { type: "array", items: { type: "string" } } },
   required: ["introduction", "tips"]
 };
+const resumeImprovementSchema = {
+  type: "object", additionalProperties: false,
+  properties: { summary: { type: "string" }, bullets: { type: "array", items: { type: "string" } }, keywords: { type: "array", items: { type: "string" } }, note: { type: "string" } },
+  required: ["summary", "bullets", "keywords", "note"]
+};
 
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };
 createServer(async (req, res) => {
@@ -85,6 +91,7 @@ createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/analyze") { const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(analysisInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_analysis", analysisSchema)); }
     if (req.method === "POST" && req.url === "/api/interview") { const { answer, job } = await readBody(req); requireText(answer, "Answer"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(interviewInstruction, `TARGET ROLE:\n${job}\n\nANSWER:\n${answer}`, "interview_feedback", interviewSchema)); }
     if (req.method === "POST" && req.url === "/api/introduction") { const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new Error("Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
+    if (req.method === "POST" && req.url === "/api/improve-resume") { const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); return json(res, 200, await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema)); }
     if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "" });
     const pathname = req.url === "/" ? "index.html" : normalize(req.url.split("?")[0]).replace(/^[/\\]+/, "");
     const file = join(root, pathname); if (!file.startsWith(root)) return json(res, 403, { error: "Forbidden" });

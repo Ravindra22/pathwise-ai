@@ -1,30 +1,67 @@
 # Pathwise — AI Career Copilot
 
-Pathwise is an AI career copilot that turns a résumé and target job into a practical next-step plan.
+Pathwise helps people turn career uncertainty into an actionable plan. Upload or paste a resume, add a target role, and receive an AI-guided view of fit, ATS keyword coverage, strengths, gaps, a four-week roadmap, interview practice, and a tailored introduction.
+
+## Why Pathwise
+
+Job seekers often receive generic advice: “learn more skills,” “improve your resume,” or “practice interviews.” Pathwise makes that advice specific to the person and role in front of them. It turns the next move into a small, visible action rather than another overwhelming checklist.
 
 ## Features
 
-- AI résumé-to-role fit analysis
-- Upload a text-based résumé or paste its contents
-- Strength and skill-gap identification
-- A personalized four-week learning roadmap
-- Mock-interview feedback focused on clarity, trade-offs, and impact
+- Resume upload for PDF, DOCX, TXT, and MD files, or paste-in experience
+- AI role-fit analysis with strengths, gaps, and a Fit Score
+- ATS keyword coverage estimate based on the supplied job description
+- AI resume-improvement suggestions: a tailored summary, bullet ideas, and relevant keywords to review
+- Guided four-week roadmap with task steps, saved progress, optional proof of progress, completion, and reopen controls
+- Saved career plans backed by Supabase authentication and database storage
+- AI mock-interview coaching focused on structure, judgment, trade-offs, and impact
+- **Craft intro**: tailored “Tell me about yourself” versions for recruiter, hiring-manager, and technical interviews
+- Light and dark themes, responsive UI, guided demo mode, plan download, and in-app validation messages
 
 ## Built with
 
-HTML, CSS, JavaScript, Node.js, the OpenAI Responses API, GitHub, Codex, and GPT-5.6.
+- HTML, CSS, and JavaScript
+- Node.js HTTP server
+- OpenAI Responses API and GPT-5.6 Luna
+- Supabase Auth and Postgres
+- Codex
 
 ## How Codex and GPT-5.6 were used
 
-Codex was used throughout the project to design the interface, scaffold the full-stack application, implement the Node.js server, connect the browser experience to the OpenAI Responses API, add secure environment-variable handling, test the code, and document the project.
+Codex was used throughout the build to shape the product flow, implement the polished interface, write the Node.js server, connect Supabase authentication and career-plan persistence, add resume-file parsing, test syntax, and prepare this documentation.
 
-GPT-5.6 Luna powers the app's career intelligence. The server sends the user's résumé and target job description to the OpenAI Responses API, then returns a structured fit score, matched strengths, skill gaps, and a learning roadmap. It also evaluates mock-interview answers and provides concrete coaching feedback. API calls run only on the server, so the OpenAI API key is never exposed in browser code. The app limits text size and demo requests to help control costs.
+GPT-5.6 Luna powers Pathwise’s career intelligence through the OpenAI Responses API. The application uses structured JSON outputs for resume-to-role analysis, four-week roadmaps, mock-interview feedback, and tailored interview introductions. These outputs are rendered as actionable UI rather than raw chat responses.
+
+The app keeps the OpenAI API key server-side, applies text-size and request limits, and asks users to review AI suggestions rather than treating them as guaranteed hiring or ATS outcomes.
 
 ## Run locally
 
 1. Copy `.env.example` to `.env`.
-2. Add your `OPENAI_API_KEY` to `.env`.
-3. Run `node server.mjs`.
-4. Open http://localhost:3000.
+2. Add the required values:
 
-Do not commit `.env`. It is excluded by `.gitignore`.
+   ```bash
+   OPENAI_API_KEY=your_openai_key
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+   ```
+
+3. In the Supabase SQL Editor, run [`supabase-progress.sql`](supabase-progress.sql) to support saved-plan progress and deletion.
+4. Start the server:
+
+   ```bash
+   node server.mjs
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000).
+
+## Privacy and safety
+
+- Do not commit `.env`; it is excluded by `.gitignore`.
+- The browser never receives the OpenAI API key.
+- Pathwise provides career guidance, not a guarantee of ATS performance or employment outcomes.
+- Users should verify every resume or interview suggestion before using it.
+
+## Demo
+
+- Source code: https://github.com/Ravindra22/pathwise-ai
+- Demo video: _to be added_
