@@ -3,24 +3,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pathwise AI — Career Copilot</title>
+    <title>Pathwise — AI Career Copilot</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      body { background: radial-gradient(circle at 82% 8%, #e9f8b5 0, transparent 25%), var(--paper); }
+      .hero { position:relative; perspective: 900px; overflow:hidden; }
+      .orbit { border: 0; background: linear-gradient(145deg, #faffd4, #bfdc5a); box-shadow: 20px 24px 0 #b8cba7, 25px 30px 42px rgba(24,34,30,.18); transform: rotate(-12deg) rotateX(12deg) rotateY(-14deg); }
+      .orbit::after { content:""; position:absolute; inset:13px; border:1px solid rgba(24,34,30,.35); border-radius:50%; }
+      .orbit-core { box-shadow: inset 5px 5px 12px rgba(255,255,255,.75), inset -7px -7px 14px rgba(91,119,30,.22), 7px 9px 0 rgba(24,34,30,.18); }
+      .tabs, .results, .interview-card { box-shadow: 0 15px 30px rgba(24,34,30,.07); }
+      .results { border:0; transform: translateZ(0); }
+      .score-card,.insight { background: rgba(255,253,248,.92); }
+      .score-card { box-shadow: inset -7px 0 14px rgba(24,34,30,.035); }
+      .week { transition: transform .2s ease, background .2s ease; }
+      .week:hover { transform: translateX(8px); background: rgba(255,255,255,.25); }
+      .primary { box-shadow: 0 7px 0 #090d0b, 0 12px 20px rgba(24,34,30,.2); transition: transform .15s ease, box-shadow .15s ease; }
+      .primary:hover { transform: translateY(-3px); box-shadow: 0 10px 0 #090d0b, 0 16px 25px rgba(24,34,30,.25); }
+      .primary:active { transform: translateY(4px); box-shadow: 0 3px 0 #090d0b; }
+      .interview-card { transform: perspective(1000px) rotateX(1deg); border-radius: 8px; }
+      .hero::before { content:"✦"; position:absolute; right:32%; top:18%; color:#b8ff64; font:31px "Fraunces"; text-shadow:0 0 22px rgba(184,255,100,.85); animation:hero-spark 3.4s ease-in-out infinite; pointer-events:none; }.hero::after { content:"✧  ·  ✦"; position:absolute; right:4%; bottom:14%; color:#a98bff; font:19px "DM Mono"; letter-spacing:10px; text-shadow:0 0 18px rgba(169,139,255,.72); animation:hero-spark 4.4s ease-in-out .5s infinite; pointer-events:none; } @keyframes hero-spark { 0%,100% { opacity:.3; transform:translate3d(0,8px,0) scale(.82) rotate(-8deg); } 50% { opacity:1; transform:translate3d(0,-10px,18px) scale(1.16) rotate(8deg); } }
+      @media(max-width:760px){ .orbit { display:none; } .interview-card { transform:none; } }
+
+      /* Premium visual system */
+      :root { --ink:#f4f7ff; --muted:#a9b4ca; --paper:#080b16; --mint:#111a2d; --lime:#b8ff64; --rust:#a98bff; --line:rgba(194,211,255,.16); }
+      body { min-height:100vh; background:radial-gradient(circle at 15% 0%, rgba(112,86,255,.28), transparent 31%),radial-gradient(circle at 94% 15%, rgba(90,240,212,.15), transparent 26%),#080b16; }
+      body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.35; background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:44px 44px; mask-image:linear-gradient(to bottom,black,transparent 72%); }
+      .shell { position:relative; }
+      header { border-color:var(--line); }
+      .brand { color:#fff; }.brand .brand-subtitle { margin-left:8px; color:#a9b4ca; font:9px "DM Mono"; letter-spacing:.5px; text-transform:uppercase; }.brand-mark { background:linear-gradient(135deg,#b8ff64,#65e7d1); color:#071018; box-shadow:0 4px 14px rgba(184,255,100,.26); }.avatar { width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; padding:0; line-height:1; font:600 13px "DM Mono"; box-shadow:0 8px 20px rgba(94,92,230,.34), inset 1px 1px 0 rgba(255,255,255,.26); }
+      .demo-pill { color:#b8ff64; border-color:rgba(184,255,100,.35); background:rgba(184,255,100,.08); }.avatar { background:linear-gradient(145deg,#a98bff,#5e5ce6); }
+      .hero h1 { color:#f8f9ff; }.hero em { color:#b8ff64; text-shadow:0 0 24px rgba(184,255,100,.25); }.lede { color:#b9c3d8; }
+      .orbit { background:linear-gradient(145deg,#1e2b51,#111a33); box-shadow:18px 22px 0 #131b31,28px 38px 62px rgba(0,0,0,.48),inset 1px 1px 0 rgba(255,255,255,.23); animation:orbit-float 5.5s ease-in-out infinite; }.orbit-core { background:linear-gradient(145deg,#c4ff7c,#68e9d3); color:#071018; } @keyframes orbit-float { 0%,100% { transform:rotate(-12deg) rotateX(12deg) rotateY(-14deg) translateY(0); } 50% { transform:rotate(-8deg) rotateX(15deg) rotateY(-9deg) translateY(-13px); } }
+      .tabs { border-color:var(--line); background:rgba(13,19,36,.6); backdrop-filter:blur(12px); }.tab { color:#93a0b8; border-color:var(--line); }.tab strong { color:#f4f7ff; }.tab.active { background:linear-gradient(120deg,rgba(169,139,255,.26),rgba(103,232,210,.15)); box-shadow:inset 0 -2px #b8ff64; }
+      .panel-copy>p:not(.eyebrow),.eyebrow { color:#a9b4ca; }.panel h2 { color:#f4f7ff; }
+      textarea { color:#ecf2ff; background:rgba(15,23,43,.82); border-color:rgba(188,207,255,.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }.analysis-form small { color:#a9b4ca; }.analysis-form input[type=file] { color:#b8ff64; }
+      .primary { background:linear-gradient(135deg,#b8ff64,#67e6d4); color:#071018; box-shadow:0 7px 0 #347e6e,0 14px 26px rgba(67,215,189,.16); }.primary span { color:#071018; }.primary:hover { box-shadow:0 10px 0 #347e6e,0 17px 28px rgba(67,215,189,.22); }.primary:active { box-shadow:0 3px 0 #347e6e; }
+      .results { background:rgba(15,22,40,.78); border:1px solid rgba(185,205,255,.16); border-radius:10px; overflow:hidden; box-shadow:0 24px 50px rgba(0,0,0,.28); }.score-card,.insight { background:transparent; border-color:var(--line); }.score-card>p:last-of-type,.insight h3 { color:#f4f7ff; }.meter { background:#27334d; }.meter i { background:linear-gradient(90deg,#a98bff,#b8ff64); }.chips span { background:rgba(103,232,210,.14); color:#aaf8e4; border:1px solid rgba(103,232,210,.18); }.chips.rust span { background:rgba(169,139,255,.15); color:#d8caff; }
+      .roadmap { background:linear-gradient(135deg,rgba(19,31,57,.96),rgba(11,17,33,.96)); border-top:1px solid var(--line); }.week { border-color:rgba(188,207,255,.15); }.week h3 { color:#f4f7ff; }.week p,.week-label { color:#a9b4ca; }.week .check { border-color:#b8ff64; }.week.done .check { background:#b8ff64; }.text-button { color:#b8ff64; }
+      .interview { border-color:var(--line); }.interview-card { background:linear-gradient(145deg,#182544,#0d1428); border:1px solid rgba(188,207,255,.16); box-shadow:0 24px 55px rgba(0,0,0,.35); }.interview-card textarea { background:rgba(5,10,22,.55); }.answer-footer { color:#a9b4ca; }.interview-card .text-button { margin-bottom:15px; }.feedback { border-color:rgba(188,207,255,.16); color:#cbd6e9; }.feedback strong { color:#b8ff64; }
+      footer { border-color:var(--line); color:#8996b0; }
+      body.light-theme { --ink:#142033; --muted:#58677d; --paper:#f4f7fc; --mint:#e8eff8; --lime:#62ce76; --rust:#765be6; --line:rgba(41,61,94,.16); background:radial-gradient(circle at 14% 0%,rgba(118,91,230,.13),transparent 31%),radial-gradient(circle at 94% 15%,rgba(31,180,158,.12),transparent 26%),#f4f7fc; }
+      body.light-theme .brand,body.light-theme .hero h1,body.light-theme .tab strong,body.light-theme .panel h2,body.light-theme .score-card>p:last-of-type,body.light-theme .insight h3,body.light-theme .week h3 { color:#142033; } body.light-theme .brand .brand-subtitle { color:#58677d; } body.light-theme .hero em { color:#5b42c7; text-shadow:none; } body.light-theme .hero::before { color:#5b42c7; text-shadow:0 0 18px rgba(91,66,199,.32); }
+      body.light-theme .lede,body.light-theme .panel-copy>p:not(.eyebrow),body.light-theme .eyebrow,body.light-theme .week p,body.light-theme .week-label,body.light-theme .analysis-form small { color:#58677d; }
+      body.light-theme .orbit { background:linear-gradient(145deg,#fff,#dce9ff); box-shadow:18px 22px 0 #cad8e9,28px 38px 62px rgba(45,71,110,.17),inset 1px 1px 0 #fff; }
+      body.light-theme .tabs { background:rgba(255,255,255,.72); }.light-theme .tab { color:#52627a; }.light-theme .tab strong { color:#263754; }.light-theme .tab.active { color:#334361; background:linear-gradient(120deg,rgba(118,91,230,.14),rgba(78,208,184,.14)); }
+      body.light-theme textarea { color:#142033; background:rgba(255,255,255,.9); border-color:rgba(41,61,94,.19); }
+      body.light-theme .results { background:rgba(255,255,255,.8); border-color:rgba(41,61,94,.13); box-shadow:0 24px 50px rgba(45,71,110,.12); } body.light-theme .results .eyebrow { color:#52627a; } body.light-theme .insight>p:not(.eyebrow) { color:#42536d; } body.light-theme .insight h3 { color:#1d2c45; } body.light-theme .chips span { color:#176a60; background:#e4f8f2; border-color:#abdcd1; } body.light-theme .chips.rust span { color:#5b42a7; background:#f0ebff; border-color:#d3c6fb; } body.light-theme .results .text-button { color:#5b42c7; font-weight:700; }
+      body.light-theme .roadmap { background:linear-gradient(135deg,#e4edf9,#f3f7fc); }.light-theme .interview-card { background:linear-gradient(145deg,#1b2a4d,#111c36); }.light-theme footer { color:#65758d; }
+      .answer-footer .primary { background:linear-gradient(135deg,#b399ff,#7d68e9); color:#fff; box-shadow:0 7px 0 #4d3cac,0 14px 26px rgba(125,104,233,.28); }
+      .answer-footer .primary span { color:#fff; }.answer-footer .primary:hover { box-shadow:0 10px 0 #4d3cac,0 17px 28px rgba(125,104,233,.32); }.answer-footer .primary:active { box-shadow:0 3px 0 #4d3cac; }
+      body.light-theme .demo-pill { color:#23314a; border-color:rgba(35,49,74,.28); background:rgba(255,255,255,.76); }
+      body.light-theme #theme-toggle { color:#23314a; border-color:rgba(35,49,74,.3); background:#fff; }
+      dialog { position:relative; overflow:hidden; width:min(440px,calc(100vw - 36px)); border:1px solid rgba(188,207,255,.22); border-radius:16px; padding:30px; color:#f4f7ff; background:linear-gradient(145deg,#192647,#0c1327); box-shadow:0 30px 90px rgba(0,0,0,.58); } dialog::before { content:""; position:absolute; z-index:0; width:230px; height:230px; top:-125px; right:-80px; border-radius:50%; background:radial-gradient(circle,rgba(184,255,100,.22),rgba(103,232,210,.08) 39%,transparent 70%); filter:blur(5px); animation:auth-glow 5s ease-in-out infinite alternate; } dialog::after { content:"✦  ·  ✧"; position:absolute; z-index:0; right:29px; top:24px; color:rgba(218,255,179,.64); font:13px "DM Mono"; letter-spacing:7px; animation:auth-sparkle 3.5s ease-in-out infinite; } dialog > * { position:relative; z-index:1; } @keyframes auth-glow { from { transform:translate3d(-13px,8px,0) scale(.9); opacity:.55; } to { transform:translate3d(15px,-10px,0) scale(1.12); opacity:1; } } @keyframes auth-sparkle { 0%,100% { opacity:.35; transform:scale(.9); } 50% { opacity:1; transform:scale(1.1); } }
+      dialog::backdrop { background:rgba(3,6,15,.68); backdrop-filter:blur(7px); } dialog h2 { margin:0 0 14px; font-family:"Fraunces"; font-size:35px; } dialog form { display:grid; gap:17px; margin-top:26px; } dialog label { display:grid; gap:8px; color:#cbd6e9; font:12px "DM Mono"; letter-spacing:.45px; } dialog input { width:100%; border:1px solid rgba(188,207,255,.22); border-radius:6px; padding:13px; color:white; background:#0a1124; font:14px "DM Sans"; } dialog small { min-height:18px; color:#b8ff64; font:11px "DM Sans"; } #close-auth { position:absolute; top:12px; right:14px; border:0; background:transparent; color:#cbd6e9; font-size:26px; cursor:pointer; } #sign-up { text-align:left; }
+      body.light-theme dialog { color:#142033; background:linear-gradient(145deg,#fff,#eaf0fa); } body.light-theme dialog input { color:#142033; background:#fff; border-color:rgba(41,61,94,.2); }
+      .auth-mark { display:grid; place-items:center; width:42px; height:42px; border-radius:13px; margin-bottom:20px; color:#071018; background:linear-gradient(135deg,#b8ff64,#65e7d1); font-size:25px; box-shadow:0 8px 20px rgba(184,255,100,.2); }.auth-copy { color:#a9b4ca; line-height:1.55; margin:0 0 20px; }.auth-divider { display:flex; align-items:center; gap:10px; color:#8490aa; font-size:11px; }.auth-divider span { flex:1; height:1px; background:rgba(188,207,255,.18); }.auth-secondary { padding:12px; border-radius:6px; color:#eaf0ff; background:transparent; border:1px solid rgba(188,207,255,.27); font:600 13px "DM Sans"; cursor:pointer; }.name-fields { display:grid; grid-template-columns:1fr 1fr; gap:14px; }.name-fields[hidden] { display:none; }.analysis-form label { display:grid; gap:8px; color:#cbd6e9; font-size:12px; line-height:1.35; letter-spacing:.45px; }.analysis-form textarea { margin-top:0; }.analysis-form input[type=file] { margin-top:2px; }.analysis-form small { margin-top:-2px; }.guest-start { margin-top:28px; }.guest-hidden { display:none; } body:not(.signed-in) #app-content { display:none; } body.signed-in .guest-start { display:none; } body.signed-in .guest-hidden { display:inline-grid; } dialog small:not(:empty) { display:block; padding:11px 12px; border-radius:7px; font:600 13px/1.35 "DM Sans"; } dialog small[data-state="error"] { color:#ffb6b6; background:rgba(221,65,65,.16); border:1px solid rgba(255,132,132,.32); } dialog small[data-state="success"] { color:#c8ff99; background:rgba(144,220,88,.13); border:1px solid rgba(184,255,100,.28); } .light-theme .auth-copy { color:#58677d; }.light-theme .auth-secondary { color:#23314a; border-color:rgba(41,61,94,.22); }.light-theme dialog label,.light-theme .analysis-form label { color:#40506a; }.light-theme dialog small[data-state="error"] { color:#a61b1b; background:#ffe7e7; border-color:#efaaaa; }.light-theme dialog small[data-state="success"] { color:#216b37; background:#e6f8e9; border-color:#a5d9af; }
+      /* Make the optional demo route discoverable in both themes. */
+      .analysis-form #demo-mode { justify-self:start; padding:11px 14px; border:1px solid rgba(184,255,100,.42); border-radius:7px; background:rgba(184,255,100,.08); color:#b8ff64; }
+      .light-theme .text-button { color:#5b42c7; }.light-theme .analysis-form #demo-mode { color:#5b42c7; background:#f0ebff; border-color:#cdbffc; }
+    </style>
   </head>
   <body>
     <main class="shell">
       <header>
-        <a class="brand" href="#top"><span class="brand-mark">↗</span>pathwise<span>AI</span></a>
-        <div class="header-actions"><span class="demo-pill">Prototype</span><button class="avatar" aria-label="Profile">AR</button></div>
+        <a class="brand" href="#top"><span class="brand-mark">↗</span>pathwise<span class="brand-subtitle">AI Career Copilot</span></a>
+        <div class="header-actions"><span class="demo-pill guest-hidden">Prototype</span><button id="demo-exit" class="demo-pill" type="button" hidden>Exit demo</button><button id="theme-toggle" class="demo-pill" type="button" aria-label="Switch color theme">☀ Light</button><button id="auth-button" class="demo-pill" type="button">Sign in</button><button id="profile-avatar" class="avatar guest-hidden" aria-label="Profile">↗</button></div>
       </header>
 
       <section id="top" class="hero">
-        <div><p class="eyebrow">YOUR CAREER, WITH CLARITY</p><h1>Make your next<br />move <em>count.</em></h1><p class="lede">Bring your experience and a role you want. Pathwise finds the gap, then gives you a route forward.</p></div>
+        <div><p class="eyebrow">YOUR CAREER, WITH CLARITY</p><h1>Make your next<br />move <em>count.</em></h1><p class="lede">Bring your experience and a role you want. Pathwise finds the gap, then gives you a route forward.</p><button id="guest-start" class="primary guest-start" type="button">Create your account <span>→</span></button></div>
         <div class="orbit" aria-hidden="true"><span>✦</span><div class="orbit-core">Your<br />next<br />chapter</div><i></i><b></b></div>
       </section>
 
+      <div id="app-content">
       <nav class="tabs" aria-label="Career Copilot features">
         <button class="tab active" data-panel="analyze">01 <strong>Analyze fit</strong></button>
         <button class="tab" data-panel="roadmap">02 <strong>Build a plan</strong></button>
@@ -30,16 +88,16 @@
       <section id="analyze" class="panel active">
         <div class="panel-copy"><p class="eyebrow">ROLE MATCH</p><h2>See what’s already<br />working—and what’s next.</h2><p>Paste a résumé and a target job description. We’ll map your strengths, flag gaps, and give you a focused first move.</p></div>
         <form id="analysis-form" class="analysis-form">
-          <label>YOUR EXPERIENCE<textarea id="resume" placeholder="Paste your résumé or key experience here…">Product-minded frontend engineer with 3 years of experience building responsive React applications. Skilled in TypeScript, JavaScript, CSS, REST APIs, Git, Figma, and collaborating in Agile product teams. Shipped analytics dashboards used by 10,000+ customers.</textarea></label>
+          <label>YOUR EXPERIENCE <input id="resume-file" type="file" accept=".txt,.md,text/plain,text/markdown" /><small id="file-status">Upload a .txt résumé or paste it below</small><textarea id="resume" placeholder="Paste your résumé or key experience here…">Product-minded frontend engineer with 3 years of experience building responsive React applications. Skilled in TypeScript, JavaScript, CSS, REST APIs, Git, Figma, and collaborating in Agile product teams. Shipped analytics dashboards used by 10,000+ customers.</textarea></label>
           <label>THE ROLE YOU WANT<textarea id="job" placeholder="Paste the job description here…">Senior Frontend Engineer — Build accessible, high-performance web experiences using React, TypeScript, Next.js and GraphQL. Partner with design and product, mentor engineers, own technical decisions, and work with testing and CI/CD systems.</textarea></label>
-          <button class="primary" type="submit">Reveal my path <span>→</span></button>
+          <button class="primary" type="submit">Reveal my path <span>→</span></button><button class="text-button" id="demo-mode" type="button">Try guided demo →</button>
         </form>
       </section>
 
       <section id="results" class="results" aria-live="polite">
         <div class="score-card"><p class="eyebrow">FIT SCORE</p><div class="score"><span id="score">72</span><small>/100</small></div><p id="score-label">Strong foundation</p><div class="meter"><i id="meter-fill"></i></div></div>
         <div class="insight"><p class="eyebrow">YOUR EDGE</p><h3 id="edge-title">You already speak product.</h3><p id="edge-copy">Your React, TypeScript and dashboard experience maps directly to the role’s core delivery work.</p><div id="matched" class="chips"></div></div>
-        <div class="insight gap"><p class="eyebrow">FOCUS NEXT</p><h3 id="gap-title">Close the senior-level gaps.</h3><p id="gap-copy">A few targeted skills will make your story more complete.</p><div id="gaps" class="chips rust"></div></div>
+        <div class="insight gap"><p class="eyebrow">FOCUS NEXT</p><h3 id="gap-title">Close the senior-level gaps.</h3><p id="gap-copy">A few targeted skills will make your story more complete.</p><div id="gaps" class="chips rust"></div><button id="save-plan" class="text-button" type="button">Save this plan</button></div>
       </section>
 
       <section id="roadmap" class="panel roadmap">
@@ -49,11 +107,14 @@
 
       <section id="interview" class="panel interview">
         <div class="panel-copy"><p class="eyebrow">MOCK INTERVIEW</p><h2>Practice the answer<br />before it counts.</h2><p>Answer a role-relevant prompt, then get instant feedback on structure, specificity, and impact.</p></div>
-        <div class="interview-card"><div class="question-top"><span class="question-number">QUESTION 01</span><span class="timer">● Practice mode</span></div><h3 id="question">Tell me about a time you made a difficult technical trade-off.</h3><textarea id="answer" placeholder="Type your answer here…"></textarea><div class="answer-footer"><span id="word-count">0 words</span><button id="score-answer" class="primary">Get feedback <span>→</span></button></div><div id="feedback" class="feedback" hidden></div></div>
+        <div class="interview-card"><div class="question-top"><span class="question-number">QUESTION 01</span><span class="timer">● Practice mode</span></div><h3 id="question">Tell me about a time you made a difficult technical trade-off.</h3><button id="new-question" class="text-button">New question ↻</button><textarea id="answer" placeholder="Type your answer here…"></textarea><div class="answer-footer"><span id="word-count">0 words</span><button id="score-answer" class="primary">Get feedback <span>→</span></button></div><div id="feedback" class="feedback" hidden></div></div>
       </section>
 
-      <footer><span>PATHWISE AI</span><p>Built for people who are going places.</p><span>© 2026</span></footer>
+      <footer><span>PATHWISE · AI CAREER COPILOT</span><p>Built for people who want to improve daily.</p><span>© 2026</span></footer>
+      </div>
     </main>
-    <script src="app.js"></script>
+    <dialog id="auth-dialog"><button id="close-auth" type="button">×</button><div class="auth-mark">↗</div><p class="eyebrow">PATHWISE ACCOUNT</p><h2 id="auth-title">Welcome back.</h2><p id="auth-copy" class="auth-copy">Sign in to pick up your career plan, roadmap progress, and interview practice.</p><form id="auth-form"><div id="name-fields" class="name-fields" hidden><label>First Name<input id="auth-first-name" type="text" autocomplete="given-name" placeholder="First Name" /></label><label>Last Name<input id="auth-last-name" type="text" autocomplete="family-name" placeholder="Last Name" /></label></div><label>Email Address<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com" /></label><label>Password<input id="auth-password" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters" /></label><button id="auth-submit" class="primary" type="submit">Sign in <span>→</span></button><div class="auth-divider"><span></span>or<span></span></div><button id="auth-mode-toggle" class="auth-secondary" type="button">Create a new account</button><small id="auth-status"></small></form></dialog>
+    <dialog id="profile-dialog"><button id="close-profile" type="button">×</button><div class="auth-mark">✦</div><p class="eyebrow">COMPLETE YOUR PROFILE</p><h2>Add your name.</h2><p class="auth-copy">Enter your first and last name. Pathwise will use it in your account and create your initials automatically.</p><form id="profile-form"><div class="name-fields"><label>First Name<input id="profile-first-name" type="text" autocomplete="given-name" required placeholder="First Name" /></label><label>Last Name<input id="profile-last-name" type="text" autocomplete="family-name" required placeholder="Last Name" /></label></div><button class="primary" type="submit">Save profile <span>→</span></button><small id="profile-status"></small></form></dialog>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
   </body>
 </html>

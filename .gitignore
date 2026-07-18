@@ -1,0 +1,10 @@
+# Secrets and local environment settings
+.env
+.env.local
+
+# System files
+.DS_Store
+
+# Dependencies and build output
+node_modules/
+dist/
