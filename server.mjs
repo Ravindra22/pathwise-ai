@@ -9,6 +9,7 @@ for (const line of env.split(/\r?\n/)) {
   if (match && !process.env[match[1]]) process.env[match[1]] = match[2].trim().replace(/^['"]|['"]$/g, "");
 }
 const key = process.env.OPENAI_API_KEY;
+const liveAnalysisEnabled = process.env.LIVE_ANALYSIS_ENABLED !== "false";
 const json = (res, status, body) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
 const readBody = async req => { let text = ""; for await (const part of req) text += part; return JSON.parse(text || "{}"); };
 function extractText(data) {
@@ -28,6 +29,9 @@ function checkLimit(req) {
 function requireText(value, name) {
   if (typeof value !== "string" || !value.trim()) throw new Error(`${name} is required.`);
   if (value.length > MAX_CHARS) throw new Error(`${name} is too long. Please use fewer than 24,000 characters.`);
+}
+function requireLiveAnalysis() {
+  if (!liveAnalysisEnabled) throw new Error("Live analysis is temporarily paused. Try guided demo instead.");
 }
 
 async function ask(instructions, input, schemaName, schema) {
@@ -89,11 +93,11 @@ const resumeImprovementSchema = {
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };
 createServer(async (req, res) => {
   try {
-    if (req.method === "POST" && req.url === "/api/analyze") { const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(analysisInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_analysis", analysisSchema)); }
-    if (req.method === "POST" && req.url === "/api/interview") { const { answer, job } = await readBody(req); requireText(answer, "Answer"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(interviewInstruction, `TARGET ROLE:\n${job}\n\nANSWER:\n${answer}`, "interview_feedback", interviewSchema)); }
-    if (req.method === "POST" && req.url === "/api/introduction") { const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new Error("Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
-    if (req.method === "POST" && req.url === "/api/improve-resume") { const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); return json(res, 200, await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema)); }
-    if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "" });
+    if (req.method === "POST" && req.url === "/api/analyze") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(analysisInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_analysis", analysisSchema)); }
+    if (req.method === "POST" && req.url === "/api/interview") { requireLiveAnalysis(); const { answer, job } = await readBody(req); requireText(answer, "Answer"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(interviewInstruction, `TARGET ROLE:\n${job}\n\nANSWER:\n${answer}`, "interview_feedback", interviewSchema)); }
+    if (req.method === "POST" && req.url === "/api/introduction") { requireLiveAnalysis(); const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new Error("Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
+    if (req.method === "POST" && req.url === "/api/improve-resume") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); return json(res, 200, await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema)); }
+    if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "", liveAnalysisEnabled });
     const pathname = req.url === "/" ? "index.html" : normalize(req.url.split("?")[0]).replace(/^[/\\]+/, "");
     const file = join(root, pathname); if (!file.startsWith(root)) return json(res, 403, { error: "Forbidden" });
     const info = await stat(file); if (!info.isFile()) return json(res, 404, { error: "Not found" });
