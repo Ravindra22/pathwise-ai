@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pathwise AI — Career Copilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <a class="brand" href="#top"><span class="brand-mark">↗</span>pathwise<span>AI</span></a>
+        <div class="header-actions"><span class="demo-pill">Prototype</span><button class="avatar" aria-label="Profile">AR</button></div>
+      </header>
+
+      <section id="top" class="hero">
+        <div><p class="eyebrow">YOUR CAREER, WITH CLARITY</p><h1>Make your next<br />move <em>count.</em></h1><p class="lede">Bring your experience and a role you want. Pathwise finds the gap, then gives you a route forward.</p></div>
+        <div class="orbit" aria-hidden="true"><span>✦</span><div class="orbit-core">Your<br />next<br />chapter</div><i></i><b></b></div>
+      </section>
+
+      <nav class="tabs" aria-label="Career Copilot features">
+        <button class="tab active" data-panel="analyze">01 <strong>Analyze fit</strong></button>
+        <button class="tab" data-panel="roadmap">02 <strong>Build a plan</strong></button>
+        <button class="tab" data-panel="interview">03 <strong>Practice live</strong></button>
+      </nav>
+
+      <section id="analyze" class="panel active">
+        <div class="panel-copy"><p class="eyebrow">ROLE MATCH</p><h2>See what’s already<br />working—and what’s next.</h2><p>Paste a résumé and a target job description. We’ll map your strengths, flag gaps, and give you a focused first move.</p></div>
+        <form id="analysis-form" class="analysis-form">
+          <label>YOUR EXPERIENCE<textarea id="resume" placeholder="Paste your résumé or key experience here…">Product-minded frontend engineer with 3 years of experience building responsive React applications. Skilled in TypeScript, JavaScript, CSS, REST APIs, Git, Figma, and collaborating in Agile product teams. Shipped analytics dashboards used by 10,000+ customers.</textarea></label>
+          <label>THE ROLE YOU WANT<textarea id="job" placeholder="Paste the job description here…">Senior Frontend Engineer — Build accessible, high-performance web experiences using React, TypeScript, Next.js and GraphQL. Partner with design and product, mentor engineers, own technical decisions, and work with testing and CI/CD systems.</textarea></label>
+          <button class="primary" type="submit">Reveal my path <span>→</span></button>
+        </form>
+      </section>
+
+      <section id="results" class="results" aria-live="polite">
+        <div class="score-card"><p class="eyebrow">FIT SCORE</p><div class="score"><span id="score">72</span><small>/100</small></div><p id="score-label">Strong foundation</p><div class="meter"><i id="meter-fill"></i></div></div>
+        <div class="insight"><p class="eyebrow">YOUR EDGE</p><h3 id="edge-title">You already speak product.</h3><p id="edge-copy">Your React, TypeScript and dashboard experience maps directly to the role’s core delivery work.</p><div id="matched" class="chips"></div></div>
+        <div class="insight gap"><p class="eyebrow">FOCUS NEXT</p><h3 id="gap-title">Close the senior-level gaps.</h3><p id="gap-copy">A few targeted skills will make your story more complete.</p><div id="gaps" class="chips rust"></div></div>
+      </section>
+
+      <section id="roadmap" class="panel roadmap">
+        <div class="panel-copy"><p class="eyebrow">4-WEEK ROADMAP</p><h2>Progress you can<br />actually see.</h2><p>Turn your skill gaps into a deliberately small weekly plan. Start with the action that gives your applications the most lift.</p><button class="text-button" id="refresh-roadmap">Refresh plan ↻</button></div>
+        <div id="roadmap-list" class="roadmap-list"></div>
+      </section>
+
+      <section id="interview" class="panel interview">
+        <div class="panel-copy"><p class="eyebrow">MOCK INTERVIEW</p><h2>Practice the answer<br />before it counts.</h2><p>Answer a role-relevant prompt, then get instant feedback on structure, specificity, and impact.</p></div>
+        <div class="interview-card"><div class="question-top"><span class="question-number">QUESTION 01</span><span class="timer">● Practice mode</span></div><h3 id="question">Tell me about a time you made a difficult technical trade-off.</h3><textarea id="answer" placeholder="Type your answer here…"></textarea><div class="answer-footer"><span id="word-count">0 words</span><button id="score-answer" class="primary">Get feedback <span>→</span></button></div><div id="feedback" class="feedback" hidden></div></div>
+      </section>
+
+      <footer><span>PATHWISE AI</span><p>Built for people who are going places.</p><span>© 2026</span></footer>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
