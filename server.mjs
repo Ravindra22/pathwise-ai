@@ -55,7 +55,7 @@ async function ask(instructions, input, schemaName, schema) {
   catch { throw new Error("The AI response could not be read. Please try the analysis again."); }
 }
 
-const analysisInstruction = `You are Pathwise, an AI career copilot. Compare a candidate resume to a job description. Give practical, encouraging advice. Make exactly four roadmap items. Follow the response schema exactly.`;
+const analysisInstruction = `You are Pathwise, an AI career copilot. Compare a candidate resume to a job description. Give practical, encouraging advice. Make exactly four roadmap items. In matched, return five concrete skills explicitly supported by the candidate's resume, prioritizing skills relevant to the target role. In strengths, return exactly seven short skill names explicitly supported by the resume. Each strength must include a direct HTTPS URL to an official documentation, official tutorial, or respected learning provider specifically for that skill. Never invent a URL, and do not use search-result URLs. Follow the response schema exactly.`;
 const interviewInstruction = `You are a kind, specific interview coach. Evaluate the answer for structure, technical judgment, clear trade-offs, and measurable impact. Give one concrete improvement. Follow the response schema exactly.`;
 const introductionInstruction = `You are a career coach. Write a warm, confident first-person “tell me about yourself” introduction based only on the candidate's résumé and target role. The audience will be provided as recruiter, hiring manager, or technical interviewer. Do not invent experience. Keep it natural, concise, and easy to say aloud. Follow the response schema exactly.`;
 const resumeImprovementInstruction = `You are a precise résumé coach. Based only on the provided résumé and target role, suggest an improved professional summary, three to five stronger résumé bullet ideas, and relevant role keywords. Never invent employers, titles, projects, skills, metrics, or accomplishments. If evidence is missing, phrase it as a keyword or learning opportunity rather than a claim. Remind the user to review every suggestion for accuracy. Follow the response schema exactly.`;
@@ -64,10 +64,11 @@ const analysisSchema = {
   properties: {
     score: { type: "integer" }, label: { type: "string" }, edgeTitle: { type: "string" }, edgeCopy: { type: "string" },
     gapTitle: { type: "string" }, gapCopy: { type: "string" }, matched: { type: "array", items: { type: "string" } },
+    strengths: { type: "array", minItems: 7, maxItems: 7, items: { type: "object", additionalProperties: false, properties: { name: { type: "string" }, resourceUrl: { type: "string" } }, required: ["name", "resourceUrl"] } },
     gaps: { type: "array", items: { type: "string" } },
     roadmap: { type: "array", items: { type: "object", additionalProperties: false, properties: { week: { type: "string" }, title: { type: "string" }, detail: { type: "string" } }, required: ["week", "title", "detail"] } }
   },
-  required: ["score", "label", "edgeTitle", "edgeCopy", "gapTitle", "gapCopy", "matched", "gaps", "roadmap"]
+  required: ["score", "label", "edgeTitle", "edgeCopy", "gapTitle", "gapCopy", "matched", "strengths", "gaps", "roadmap"]
 };
 const interviewSchema = {
   type: "object", additionalProperties: false,
