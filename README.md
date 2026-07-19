@@ -44,6 +44,7 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
    SUPABASE_URL=your_supabase_project_url
    SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
    LIVE_ANALYSIS_ENABLED=true
+   MAX_REQUESTS_PER_HOUR=3
    ```
 
 3. In the Supabase SQL Editor, run [`supabase-progress.sql`](supabase-progress.sql) to support saved-plan progress and deletion.

@@ -10,6 +10,7 @@ for (const line of env.split(/\r?\n/)) {
 }
 const key = process.env.OPENAI_API_KEY;
 const liveAnalysisEnabled = process.env.LIVE_ANALYSIS_ENABLED !== "false";
+const maxRequestsPerHour = Number.parseInt(process.env.MAX_REQUESTS_PER_HOUR || "3", 10) || 3;
 const json = (res, status, body) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
 const readBody = async req => { let text = ""; for await (const part of req) text += part; return JSON.parse(text || "{}"); };
 function extractText(data) {
@@ -23,7 +24,7 @@ const MAX_CHARS = 24_000;
 function checkLimit(req) {
   const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
   const now = Date.now(); const recent = (requests.get(ip) || []).filter(time => now - time < 60 * 60 * 1000);
-  if (recent.length >= 6) throw new Error("You have reached the hourly demo limit. Please try again later.");
+  if (recent.length >= maxRequestsPerHour) throw new Error("You have reached the hourly live-analysis limit. Please try again later or use guided demo.");
   recent.push(now); requests.set(ip, recent);
 }
 function requireText(value, name) {
