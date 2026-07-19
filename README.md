@@ -51,7 +51,7 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
 4. Start the server:
 
    ```bash
-   node server.mjs
+   npm start
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000).

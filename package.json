@@ -1,0 +1,13 @@
+{
+  "name": "pathwise-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pathwise — AI Career Copilot",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
