@@ -104,4 +104,4 @@ createServer(async (req, res) => {
     const info = await stat(file); if (!info.isFile()) return json(res, 404, { error: "Not found" });
     res.writeHead(200, { "Content-Type": types[extname(file)] || "application/octet-stream" }); res.end(await readFile(file));
   } catch (error) { json(res, 500, { error: error.message || "Something went wrong." }); }
-}).listen(process.env.PORT || 3000, () => console.log(`Pathwise — AI Career Copilot is running at http://localhost:${process.env.PORT || 3000}`));
+}).listen(process.env.PORT || 3000, "0.0.0.0", () => console.log(`Pathwise — AI Career Copilot is running at http://localhost:${process.env.PORT || 3000}`));
