@@ -10,7 +10,7 @@ for (const line of env.split(/\r?\n/)) {
 }
 const key = process.env.OPENAI_API_KEY;
 const liveAnalysisEnabled = process.env.LIVE_ANALYSIS_ENABLED !== "false";
-const maxRequestsPerHour = Number.parseInt(process.env.MAX_REQUESTS_PER_HOUR || "10", 10) || 10;
+const maxRequestsPerHour = Number.parseInt(process.env.MAX_REQUESTS_PER_HOUR || "20", 10) || 20;
 const json = (res, status, body) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
 const readBody = async req => { let text = ""; for await (const part of req) text += part; return JSON.parse(text || "{}"); };
 function extractText(data) {
