@@ -11,7 +11,7 @@ Job seekers often receive generic advice: “learn more skills,” “improve yo
 - Resume upload for PDF, DOCX, TXT, and MD files, or paste-in experience
 - AI role-fit analysis with strengths, gaps, and a Fit Score
 - ATS keyword coverage estimate based on the supplied job description
-- AI resume-improvement suggestions: a tailored summary, bullet ideas, and relevant keywords to review
+- AI resume-improvement suggestions: a tailored summary and bullet ideas to review
 - Guided four-week roadmap with task steps, saved progress, optional proof of progress, completion, and reopen controls
 - Saved career plans backed by Supabase authentication and database storage
 - AI mock-interview coaching focused on structure, judgment, trade-offs, and impact
@@ -22,7 +22,7 @@ Job seekers often receive generic advice: “learn more skills,” “improve yo
 
 - HTML, CSS, and JavaScript
 - Node.js HTTP server
-- OpenAI Responses API and GPT-5.6 Luna
+- OpenAI Responses API and GPT-5.6 (`gpt-5.6-luna`)
 - Supabase Auth and Postgres
 - Codex
 
@@ -65,5 +65,6 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
 
 ## Demo
 
+- Live app: https://pathwise-ai-rtpc.onrender.com
 - Source code: https://github.com/Ravindra22/pathwise-ai
-- Demo video: _to be added_
+- Demo video: _Add the public YouTube demo link here before submission._
