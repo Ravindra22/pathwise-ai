@@ -67,4 +67,4 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
 
 - Live app: https://pathwise-ai-rtpc.onrender.com
 - Source code: https://github.com/Ravindra22/pathwise-ai
-- Demo video: _Add the public YouTube demo link here before submission._
+- Demo video: https://youtu.be/UbEITj-lJHA
