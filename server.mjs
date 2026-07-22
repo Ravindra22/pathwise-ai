@@ -11,8 +11,16 @@ for (const line of env.split(/\r?\n/)) {
 const key = process.env.OPENAI_API_KEY;
 const liveAnalysisEnabled = process.env.LIVE_ANALYSIS_ENABLED !== "false";
 const maxRequestsPerHour = Number.parseInt(process.env.MAX_REQUESTS_PER_HOUR || "20", 10) || 20;
-const json = (res, status, body) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
-const readBody = async req => { let text = ""; for await (const part of req) text += part; return JSON.parse(text || "{}"); };
+const securityHeaders = {
+  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; worker-src 'self' blob: https://cdnjs.cloudflare.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-Frame-Options": "DENY",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+};
+const json = (res, status, body) => { res.writeHead(status, { ...securityHeaders, "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
+class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
+const readBody = async req => { let text = ""; for await (const part of req) text += part; try { return JSON.parse(text || "{}"); } catch { throw new HttpError(400, "Request body must be valid JSON."); } };
 function extractText(data) {
   const text = data.output?.flatMap(item => item.content || []).find(item => item.type === "output_text")?.text;
   return text || data.output_text || "";
@@ -24,15 +32,15 @@ const MAX_CHARS = 24_000;
 function checkLimit(req) {
   const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
   const now = Date.now(); const recent = (requests.get(ip) || []).filter(time => now - time < 60 * 60 * 1000);
-  if (recent.length >= maxRequestsPerHour) throw new Error("You have reached the hourly live-analysis limit. Please try again later or use guided demo.");
+  if (recent.length >= maxRequestsPerHour) throw new HttpError(429, "You have reached the hourly live-analysis limit. Please try again later or use guided demo.");
   recent.push(now); requests.set(ip, recent);
 }
 function requireText(value, name) {
-  if (typeof value !== "string" || !value.trim()) throw new Error(`${name} is required.`);
-  if (value.length > MAX_CHARS) throw new Error(`${name} is too long. Please use fewer than 24,000 characters.`);
+  if (typeof value !== "string" || !value.trim()) throw new HttpError(400, `${name} is required.`);
+  if (value.length > MAX_CHARS) throw new HttpError(400, `${name} is too long. Please use fewer than 24,000 characters.`);
 }
 function requireLiveAnalysis() {
-  if (!liveAnalysisEnabled) throw new Error("Live analysis is temporarily paused. Try guided demo instead.");
+  if (!liveAnalysisEnabled) throw new HttpError(503, "Live analysis is temporarily paused. Try guided demo instead.");
 }
 
 async function ask(instructions, input, schemaName, schema) {
@@ -103,12 +111,12 @@ createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/analyze") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(analysisInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_analysis", analysisSchema)); }
     if (req.method === "POST" && req.url === "/api/interview") { requireLiveAnalysis(); const { answer, job, question = "", category = "" } = await readBody(req); requireText(answer, "Answer"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(interviewInstruction, `TARGET ROLE:\n${job}\n\nQUESTION TYPE: ${category}\nQUESTION: ${question}\n\nANSWER:\n${answer}`, "interview_feedback", interviewSchema)); }
     if (req.method === "POST" && req.url === "/api/interview-question") { requireLiveAnalysis(); const { resume, job, previousQuestions = [] } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); const prior = Array.isArray(previousQuestions) ? previousQuestions.filter(question => typeof question === "string").slice(-5) : []; checkLimit(req); return json(res, 200, await ask(interviewQuestionInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}\n\nPREVIOUS QUESTIONS TO AVOID:\n${prior.length ? prior.map(question => `- ${question}`).join("\n") : "None"}`, "technical_interview_question", interviewQuestionSchema)); }
-    if (req.method === "POST" && req.url === "/api/introduction") { requireLiveAnalysis(); const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new Error("Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
+    if (req.method === "POST" && req.url === "/api/introduction") { requireLiveAnalysis(); const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new HttpError(400, "Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
     if (req.method === "POST" && req.url === "/api/improve-resume") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); return json(res, 200, await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema)); }
     if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "", liveAnalysisEnabled });
     const pathname = req.url === "/" ? "index.html" : normalize(req.url.split("?")[0]).replace(/^[/\\]+/, "");
     const file = join(root, pathname); if (!file.startsWith(root)) return json(res, 403, { error: "Forbidden" });
-    const info = await stat(file); if (!info.isFile()) return json(res, 404, { error: "Not found" });
-    res.writeHead(200, { "Content-Type": types[extname(file)] || "application/octet-stream" }); res.end(await readFile(file));
-  } catch (error) { json(res, 500, { error: error.message || "Something went wrong." }); }
+    const info = await stat(file).catch(() => null); if (!info || !info.isFile()) return json(res, 404, { error: "Not found" });
+    res.writeHead(200, { ...securityHeaders, "Content-Type": types[extname(file)] || "application/octet-stream" }); res.end(await readFile(file));
+  } catch (error) { json(res, error instanceof HttpError ? error.status : 500, { error: error.message || "Something went wrong." }); }
 }).listen(process.env.PORT || 3000, "0.0.0.0", () => console.log(`Pathwise — AI Career Copilot is running at http://localhost:${process.env.PORT || 3000}`));
