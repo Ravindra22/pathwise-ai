@@ -77,3 +77,14 @@ textarea:focus { border-color: rgba(197, 255, 132, .65); box-shadow: 0 0 0 3px r
 .save-help { margin: 8px 0 0; color: #8492a8; font-size: 10px; line-height: 1.45; }
 @media (max-width: 860px) { .analysis-layout { grid-template-columns: 1fr; }.result-panel { min-height: 400px; }.empty-state { min-height: 365px; } }
 @media (max-width: 600px) { :host { padding-top: 32px; }.intro { margin-bottom: 26px; } h1 { letter-spacing: -1.4px; }.lede { font-size: 13px; }.new-resume-prompt { align-items: flex-start; flex-direction: column; margin-bottom: 14px; }.analysis-form, .result-panel { padding: 19px; }.result-panel { min-height: 390px; }.empty-state { min-height: 350px; padding: 8px 4px; }.empty-state h2 { font-size: 36px; } }
+/* Readability: keep instructions and controls comfortably legible. */
+.form-heading p { font-size: 14px; line-height: 1.5; }
+label { font-size: 13px; }
+textarea { font-size: 16px; }
+textarea::placeholder { color: #aab6c8; opacity: 1; }
+.field-meta, .validation, .limited-note, .new-resume-prompt div span, .new-resume-prompt a, .save-message, .save-help { font-size: 14px; }
+.new-resume-prompt strong { font-size: 15px; }
+.insight-block > p:not(.eyebrow), .next-step p:not(.eyebrow), .empty-state > p:not(.eyebrow) { font-size: 14px; }
+.fit-score span, .chip-label, .chip, .explain { font-size: 14px !important; }
+.save-button { font-size: 15px; }
+.eyebrow { font-size: 13px; }

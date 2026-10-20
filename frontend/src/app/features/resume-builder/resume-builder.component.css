@@ -73,3 +73,14 @@ input:focus, textarea:focus { border-color: rgba(197,255,132,.65); box-shadow: 0
   .actions > button { flex: 1 1 auto; }
   .resume-editor { min-height: 350px; }
 }
+/* Readability: keep prompts and field guidance easy to scan. */
+.lede, .step-heading div > p:last-child, .hint, .skill-picker > p, .error, .privacy-note, .draft-note p, .review-check, .download-help, .download-message, .trust-note { font-size: 15px; }
+.field label, .draft-label, .skill-picker legend { font-size: 13px; }
+.field label i, .skill-picker legend i { color: #b6c2d2; font-size: 13px; }
+.progress-labels { font-size: 14px; }
+.skill-option { font-size: 13px !important; }
+input:not([type=checkbox]), textarea { font-size: 16px; }
+input::placeholder, textarea::placeholder { color: #aab6c8; opacity: 1; }
+.primary, .secondary { font-size: 14px; }
+.error-banner { font-size: 14px; }
+.resume-editor { font-size: 13px; }

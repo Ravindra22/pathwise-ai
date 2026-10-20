@@ -29,3 +29,13 @@
 .back-link { display: inline-block; margin-top: 24px; color: #97a6bc; font-size: 11px; text-decoration: none; }
 .loading-line { width: 100%; height: 4px; margin-top: 25px; overflow: hidden; border-radius: 4px; background: linear-gradient(90deg, #c5ff84 0 30%, rgba(197, 255, 132, .14) 30%); }
 @media(max-width: 760px) { :host { padding-top: 30px; }.auth-layout { grid-template-columns: 1fr; max-width: 480px; gap: 25px; margin-top: 0; }.auth-story { text-align: center; }.auth-story h1 { font-size: 51px; }.auth-story > p:not(.eyebrow) { margin: 0 auto; }.story-marks { justify-content: center; margin-top: 20px; }.auth-card { padding: 25px; } }
+.card-copy, .switch-mode, .message, .validation, .back-link { font-size: 13px; }
+.auth-card label { font-size: 11px; }
+.auth-card input { font-size: 15px; }
+.auth-submit, .text-link { font-size: 13px; }
+.story-marks { font-size: 10px; }
+.auth-card input { font-size: 15px; }
+.auth-card input::placeholder { color: #aab6c8; opacity: 1; }
+.text-link, .switch-mode, .message, .validation, .back-link { font-size: 14px; }
+.auth-card label { font-size: 12px; }
+.auth-submit { font-size: 14px; }

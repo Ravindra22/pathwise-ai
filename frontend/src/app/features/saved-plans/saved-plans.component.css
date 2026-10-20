@@ -36,3 +36,10 @@ h1 em { color: #c5ff84; font-style: normal; }
 .spinner { width: 18px; height: 18px; border: 2px solid rgba(197, 255, 132, .2); border-top-color: #c5ff84; border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media(max-width: 560px) { :host { padding-top: 32px; }.library { padding: 16px; }.plan-card { padding: 14px; }.card-top h3 { font-size: 17px; }.page-intro { margin-bottom: 24px; } }
+.focus, .empty-state p, .error-message { font-size: 14px; }
+.refresh, .open-button, .delete-button, .primary-link { font-size: 14px; }
+.library-heading h2 span, .score span, .card-top .eyebrow { font-size: 11px; }
+.page-intro > p:last-child, .focus, .empty-state p, .error-message { font-size: 16px; }
+.refresh, .open-button, .delete-button, .primary-link { font-size: 16px; }
+.library-heading h2 span, .score span, .card-top .eyebrow { font-size: 12px; }
+.eyebrow { font-size: 11px; }

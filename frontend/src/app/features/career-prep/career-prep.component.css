@@ -57,3 +57,18 @@ select { width:100%; min-height:39px; margin-bottom:11px; padding:8px 10px; bord
 .trust-note strong { color:#dce5f2; }
 @media(max-width:760px) { .prep-grid { grid-template-columns:1fr; }.prep-card { min-height:0; }.context-grid { grid-template-columns:1fr; }.context-grid textarea { min-height:105px; } }
 @media(max-width:560px) { :host { padding-top:25px; }.context-card,.prep-card { padding:16px; }.card-heading h2 { font-size:23px; } }
+/* Readability: increase form labels and coaching instructions. */
+.context-heading p, .helper, .feedback-item p, .try-saying p, .intro-script, .intro-output ul, .intro-empty p, .trust-note { font-size: 13px; }
+label { font-size: 12px; }
+textarea { font-size: 14px; }
+textarea::placeholder { color: #aab6c8; opacity: 1; }
+.context-grid small { font-size: 12px; }
+.error-message { font-size: 13px; }
+.primary-button, .secondary-button, select, .copy-button { font-size: 14px; }
+.feedback-item strong, .try-saying strong { font-size: 13px; }
+.lede, .context-heading p, .helper, .feedback-item p, .try-saying p, .intro-script, .intro-output ul, .intro-empty p, .trust-note { font-size: 14px; }
+label { font-size: 13px; }
+textarea { font-size: 15px; }
+.context-grid small { font-size: 13px; }
+.primary-button, .secondary-button, select, .copy-button { font-size: 16px; }
+.eyebrow, .context-heading > span, .card-icon, .feedback-item strong, .try-saying strong { font-size: 14px; }

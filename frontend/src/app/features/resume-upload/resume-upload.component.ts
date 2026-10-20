@@ -16,13 +16,13 @@ import { ResumeFileService } from '../../core/resume-file.service';
   styles: [`
     :host { display:block; margin: 0 0 10px; }
     .upload-row { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
-    .upload-button { display:inline-flex; align-items:center; gap:7px; padding:8px 10px; border:1px solid rgba(197,255,132,.31); border-radius:6px; color:#c5ff84; background:rgba(197,255,132,.07); font:600 10px 'DM Sans',sans-serif; cursor:pointer; }
+    .upload-button { display:inline-flex; align-items:center; gap:7px; padding:9px 11px; border:1px solid rgba(197,255,132,.31); border-radius:6px; color:#c5ff84; background:rgba(197,255,132,.07); font:600 12px 'DM Sans',sans-serif; cursor:pointer; }
     .upload-button:hover { background:rgba(197,255,132,.13); }
     .upload-button span { font-size:14px; }
     input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; clip-path:inset(50%); }
     input:focus-visible + .upload-help { outline:2px solid #c5ff84; outline-offset:3px; }
-    .upload-help,.upload-status { color:#8694aa; font:9px 'DM Sans',sans-serif; }
-    .upload-status { margin:7px 0 0; line-height:1.5; }
+    .upload-help,.upload-status { color:#a3b0c4; font:12px/1.5 'DM Sans',sans-serif; }
+    .upload-status { margin:7px 0 0; }
     .upload-status.error { color:#ffb49c; }
   `],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => ResumeUploadComponent), multi: true }]
