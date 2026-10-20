@@ -56,6 +56,30 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
 
 5. Open [http://localhost:3000](http://localhost:3000).
 
+## Angular career copilot (migration preview)
+
+The Angular application lives in [`frontend/`](frontend/). It is an incremental migration preview; the existing app at port 3000 remains available. It includes resume-to-role analysis, PDF/DOCX/TXT/MD resume upload or paste, evidence-grounded resume suggestions, editable resume drafts with a one-column ATS-friendly Word export, saved plans, and interview practice with a tailored introduction.
+
+Resume files are parsed in the browser (PDF and DOCX require their local parser chunks). Extracted text is placed into an editable field and is sent to the API only when the user submits an analysis or coaching request.
+
+1. Start the existing API and legacy app in one terminal:
+
+   ```bash
+   npm start
+   ```
+
+2. In a second terminal, install Angular dependencies and start the new screen:
+
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
+
+3. Open [http://localhost:4200](http://localhost:4200). The Angular dev server proxies `/api` calls to the existing Node server on port 3000.
+
+To build the Angular app, run `npm run build` from `frontend/` or `npm run build:angular` from the repository root. The Render deployment continues to serve the existing app until a reviewed production cutover.
+
 ## Privacy and safety
 
 - Do not commit `.env`; it is excluded by `.gitignore`.

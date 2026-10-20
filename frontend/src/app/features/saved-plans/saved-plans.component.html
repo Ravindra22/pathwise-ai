@@ -1,0 +1,25 @@
+<section class="page-intro">
+  <p class="eyebrow">YOUR CAREER LIBRARY</p>
+  <h1>Plans worth<br>coming back <em>to.</em></h1>
+  <p>Pick up where you left off, revisit role-specific feedback, or make room for a new opportunity.</p>
+</section>
+
+<section class="library" aria-live="polite" aria-busy="{{ loading() }}">
+  <div class="library-heading"><div><span class="eyebrow">SAVED ROLE ANALYSES</span><h2>Your saved plans <span>{{ plans().length }}</span></h2></div><button type="button" class="refresh" (click)="refresh()" [disabled]="loading()">↻ Refresh</button></div>
+  @if (errorMessage()) { <p class="error-message" role="alert">{{ errorMessage() }}</p> }
+  @if (loading()) {
+    <div class="empty-state"><span class="spinner" aria-hidden="true"></span><p>Loading your plans…</p></div>
+  } @else if (!plans().length) {
+    <div class="empty-state"><span class="empty-mark">↗</span><h3>Your library starts with one role.</h3><p>Analyze a resume and job description, then save the result to return to it later.</p><a class="primary-link" routerLink="/analyze">Analyze a role <span>→</span></a></div>
+  } @else {
+    <div class="plan-list">
+      @for (plan of plans(); track plan.id) {
+        <article class="plan-card">
+          <div class="card-top"><div><p class="eyebrow">{{ dateLabel(plan.created_at) }} · {{ completed(plan) }}/{{ plan.roadmap.length || 4 }} STEPS COMPLETE</p><h3>{{ plan.target_role }}</h3></div><div class="score"><strong>{{ plan.analysis.score }}</strong><span>FIT</span></div></div>
+          <p class="focus">{{ plan.analysis.gapTitle || 'Revisit this role analysis and continue your plan.' }}</p>
+          <div class="card-actions"><button type="button" class="open-button" (click)="open(plan)">Open plan <span>→</span></button><button type="button" class="delete-button" [disabled]="deletingId() === plan.id" (click)="remove(plan)">{{ deletingId() === plan.id ? 'Deleting…' : 'Delete' }}</button></div>
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,48 @@
+<section class="intro">
+  <p class="eyebrow"><span>✦</span> CAREER PREP</p>
+  <h1>Walk in with<br><em>a clearer story.</em></h1>
+  <p class="lede">Practice a role-specific question and shape a natural introduction from the experience you actually have.</p>
+</section>
+
+<form class="context-card" [formGroup]="form" (ngSubmit)="$event.preventDefault()" novalidate>
+  <div class="context-heading"><span>01</span><div><h2>Use your target role</h2><p>These details personalize your question and introduction.</p></div></div>
+  <div class="context-grid">
+    <div><label for="prep-resume">YOUR RESUME</label><pw-resume-upload formControlName="resume" (loaded)="updateDraft()" /><textarea id="prep-resume" formControlName="resume" (input)="updateDraft()" rows="7" maxlength="24000" placeholder="Paste your experience or upload a file…"></textarea><small>{{ form.controls.resume.value.length }}/24,000</small></div>
+    <div><label for="prep-job">TARGET JOB DESCRIPTION</label><textarea id="prep-job" formControlName="job" (input)="updateDraft()" rows="9" maxlength="24000" placeholder="Paste the target job description…"></textarea><small>{{ form.controls.job.value.length }}/24,000</small></div>
+  </div>
+
+@if (errorMessage()) { <p class="error-message" role="alert">{{ errorMessage() }}</p> }
+
+<section class="prep-grid" aria-label="Interview preparation tools">
+  <article class="prep-card">
+    <div class="card-heading"><div><p class="eyebrow">PRACTICE OUT LOUD</p><h2>One useful question<br>at a time.</h2></div><span class="card-icon">?</span></div>
+    @if (question()) { <div class="question-box"><p class="eyebrow">ROLE-SPECIFIC QUESTION {{ questionHistory().length }}</p><p>{{ question() }}</p></div> }
+    @else { <p class="helper">Get one open-ended technical question based on the skills in your resume and role.</p> }
+    <button class="primary-button" type="button" (click)="createQuestion()" [disabled]="questionLoading()">@if (questionLoading()) { Creating question… } @else if (question()) { Try another question ↻ } @else { Create a question → }</button>
+    @if (question()) {
+      <label class="answer-label" for="practice-answer">YOUR ANSWER</label>
+      <textarea id="practice-answer" formControlName="answer" rows="5" maxlength="8000" placeholder="Use a real example. What was the situation, what did you do, and what changed?"></textarea>
+      <button class="secondary-button" type="button" (click)="reviewAnswer()" [disabled]="feedbackLoading()">@if (feedbackLoading()) { Reviewing… } @else { Review my answer → }</button>
+    }
+    @if (feedback(); as review) {
+      <div class="feedback"><p class="eyebrow">COACHING NOTES</p><h3>{{ review.headline }}</h3><div class="feedback-item"><strong>What worked</strong><p>{{ review.whatWorked }}</p></div><div class="feedback-item"><strong>Focus next</strong><p>{{ review.improveNext }}</p></div><div class="try-saying"><strong>A phrase to adapt</strong><p>{{ review.trySaying }}</p></div></div>
+    }
+  </article>
+
+  <article class="prep-card intro-card">
+    <div class="card-heading"><div><p class="eyebrow">TELL ME ABOUT YOURSELF</p><h2>Start the conversation<br>with confidence.</h2></div><span class="card-icon">↗</span></div>
+    <p class="helper">Choose who you’re speaking with. Pathwise will draft a concise opening based only on your resume.</p>
+    <label for="intro-audience">INTERVIEW MOMENT</label>
+    <select id="intro-audience" [value]="audience()" (change)="audience.set($any($event.target).value)">
+      <option value="recruiter">Recruiter call · about 30 seconds</option>
+      <option value="manager">Hiring manager · about 60 seconds</option>
+      <option value="technical">Technical interviewer · about 90 seconds</option>
+    </select>
+    <button class="primary-button" type="button" (click)="craftIntroduction()" [disabled]="introLoading()">@if (introLoading()) { Drafting your introduction… } @else { Craft my introduction → }</button>
+    @if (introduction(); as intro) {
+      <div class="intro-output"><div class="output-heading"><p class="eyebrow">YOUR INTRODUCTION</p><button type="button" class="copy-button" (click)="copyIntroduction()">Copy</button></div><p class="intro-script">{{ intro.introduction }}</p><ul>@for (tip of intro.tips; track tip) { <li>{{ tip }}</li> }</ul></div>
+    } @else { <div class="intro-empty"><span>✦</span><p>Your draft will appear here. Make it sound like you, then add a specific example you can stand behind.</p></div> }
+  </article>
+</section>
+</form>
+<p class="trust-note"><strong>Practice, don’t memorize.</strong> Confirm every detail and use these drafts as a structure for your own words.</p>

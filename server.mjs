@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
+import { verifyBulletEvidence } from "./career-utils.mjs";
 
 const root = process.cwd();
 const env = await readFile(join(root, ".env"), "utf8").catch(() => "");
@@ -20,7 +21,8 @@ const securityHeaders = {
 };
 const json = (res, status, body) => { res.writeHead(status, { ...securityHeaders, "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
-const readBody = async req => { let text = ""; for await (const part of req) text += part; try { return JSON.parse(text || "{}"); } catch { throw new HttpError(400, "Request body must be valid JSON."); } };
+const MAX_BODY_BYTES = 160 * 1024;
+const readBody = async req => { let text = ""; let size = 0; for await (const part of req) { size += part.length; if (size > MAX_BODY_BYTES) throw new HttpError(413, "Request is too large. Please shorten the resume or job description."); text += part; } try { return JSON.parse(text || "{}"); } catch { throw new HttpError(400, "Request body must be valid JSON."); } };
 function extractText(data) {
   const text = data.output?.flatMap(item => item.content || []).find(item => item.type === "output_text")?.text;
   return text || data.output_text || "";
@@ -34,6 +36,7 @@ function checkLimit(req) {
   const now = Date.now(); const recent = (requests.get(ip) || []).filter(time => now - time < 60 * 60 * 1000);
   if (recent.length >= maxRequestsPerHour) throw new HttpError(429, "You have reached the hourly live-analysis limit. Please try again later or use guided demo.");
   recent.push(now); requests.set(ip, recent);
+  if (requests.size > 5000) for (const [address, timestamps] of requests) if (!timestamps.some(time => now - time < 60 * 60 * 1000)) requests.delete(address);
 }
 function requireText(value, name) {
   if (typeof value !== "string" || !value.trim()) throw new HttpError(400, `${name} is required.`);
@@ -68,21 +71,22 @@ async function ask(instructions, input, schemaName, schema) {
   catch { throw new Error("The AI response could not be read. Please try the analysis again."); }
 }
 
-const analysisInstruction = `You are Pathwise, an AI career copilot. Compare a candidate resume to a job description. Give practical, encouraging advice. Make exactly four roadmap items. In matched, return five concrete skills explicitly supported by the candidate's resume, prioritizing skills relevant to the target role. In strengths, return exactly seven short skill names explicitly supported by the resume. Each strength must include a direct HTTPS URL to an official documentation, official tutorial, or respected learning provider specifically for that skill. Never invent a URL, and do not use search-result URLs. Follow the response schema exactly.`;
+const analysisInstruction = `You are Pathwise, an AI career copilot. Compare a candidate resume to a job description. Give practical, encouraging advice. Make exactly four roadmap items. In requiredKeywords, list up to twelve specific skills, tools, and qualifications explicitly requested by the job description, using the job's wording. In matched, return up to five of those keywords explicitly supported by the resume. In gaps, return relevant required keywords with no clear evidence in the resume. Never interpret absence of a keyword as proof the candidate lacks the skill; describe it as missing evidence. In strengths, return exactly seven short skill names explicitly supported by the resume. Each strength must include a direct HTTPS URL to an official documentation, official tutorial, or respected learning provider specifically for that skill. Never invent a URL, and do not use search-result URLs. Follow the response schema exactly.`;
 const interviewInstruction = `You are a kind, specific interview coach. Evaluate the answer for structure, technical judgment, clear trade-offs, and measurable impact. Give a short headline, one thing that worked, one most important improvement, and a concise example phrase the candidate can adapt. Do not invent facts. Follow the response schema exactly.`;
 const interviewQuestionInstruction = `You are a practical technical interviewer. Write exactly one concise, open-ended technical interview question based on the candidate's resume and target role. Focus on a technology, system, or skill explicitly mentioned in the resume or target role. Prefer a realistic design, debugging, trade-off, or implementation question. Do not ask a trick question, do not invent experience, and do not add an answer. If previous questions are provided, choose a clearly different technology or angle and never repeat one. Follow the response schema exactly.`;
 const introductionInstruction = `You are a career coach. Write a warm, confident first-person “tell me about yourself” introduction based only on the candidate's résumé and target role. The audience will be provided as recruiter, hiring manager, or technical interviewer. Do not invent experience. Keep it natural, concise, and easy to say aloud. Follow the response schema exactly.`;
-const resumeImprovementInstruction = `You are a precise résumé coach. Based only on the provided résumé and target role, suggest an improved professional summary, three to five stronger résumé bullet ideas, and relevant role keywords. Never invent employers, titles, projects, skills, metrics, or accomplishments. If evidence is missing, phrase it as a keyword or learning opportunity rather than a claim. Remind the user to review every suggestion for accuracy. Follow the response schema exactly.`;
+const resumeImprovementInstruction = `You are a precise résumé coach. Based only on the provided résumé and target role, suggest an improved professional summary, three to five stronger résumé bullet ideas, and relevant role keywords. Never invent employers, titles, projects, skills, metrics, or accomplishments. For each bullet, provide an exact short evidence excerpt copied from the résumé that supports its factual claims. If a claim has no direct evidence in the résumé, explicitly set needsInput true and use a placeholder such as [add your actual metric] rather than inventing a detail. Remind the user to review every suggestion for accuracy. Follow the response schema exactly.`;
 const analysisSchema = {
   type: "object", additionalProperties: false,
   properties: {
     score: { type: "integer" }, label: { type: "string" }, edgeTitle: { type: "string" }, edgeCopy: { type: "string" },
     gapTitle: { type: "string" }, gapCopy: { type: "string" }, matched: { type: "array", items: { type: "string" } },
+    requiredKeywords: { type: "array", items: { type: "string" } },
     strengths: { type: "array", minItems: 7, maxItems: 7, items: { type: "object", additionalProperties: false, properties: { name: { type: "string" }, resourceUrl: { type: "string" } }, required: ["name", "resourceUrl"] } },
     gaps: { type: "array", items: { type: "string" } },
     roadmap: { type: "array", items: { type: "object", additionalProperties: false, properties: { week: { type: "string" }, title: { type: "string" }, detail: { type: "string" } }, required: ["week", "title", "detail"] } }
   },
-  required: ["score", "label", "edgeTitle", "edgeCopy", "gapTitle", "gapCopy", "matched", "strengths", "gaps", "roadmap"]
+  required: ["score", "label", "edgeTitle", "edgeCopy", "gapTitle", "gapCopy", "matched", "requiredKeywords", "strengths", "gaps", "roadmap"]
 };
 const interviewSchema = {
   type: "object", additionalProperties: false,
@@ -101,22 +105,22 @@ const introductionSchema = {
 };
 const resumeImprovementSchema = {
   type: "object", additionalProperties: false,
-  properties: { summary: { type: "string" }, bullets: { type: "array", items: { type: "string" } }, keywords: { type: "array", items: { type: "string" } }, note: { type: "string" } },
+  properties: { summary: { type: "string" }, bullets: { type: "array", items: { type: "object", additionalProperties: false, properties: { text: { type: "string" }, evidence: { type: "string" }, needsInput: { type: "boolean" } }, required: ["text", "evidence", "needsInput"] } }, keywords: { type: "array", items: { type: "string" } }, note: { type: "string" } },
   required: ["summary", "bullets", "keywords", "note"]
 };
 
-const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json" };
 createServer(async (req, res) => {
   try {
     if (req.method === "POST" && req.url === "/api/analyze") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(analysisInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_analysis", analysisSchema)); }
     if (req.method === "POST" && req.url === "/api/interview") { requireLiveAnalysis(); const { answer, job, question = "", category = "" } = await readBody(req); requireText(answer, "Answer"); requireText(job, "Job description"); checkLimit(req); return json(res, 200, await ask(interviewInstruction, `TARGET ROLE:\n${job}\n\nQUESTION TYPE: ${category}\nQUESTION: ${question}\n\nANSWER:\n${answer}`, "interview_feedback", interviewSchema)); }
     if (req.method === "POST" && req.url === "/api/interview-question") { requireLiveAnalysis(); const { resume, job, previousQuestions = [] } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); const prior = Array.isArray(previousQuestions) ? previousQuestions.filter(question => typeof question === "string").slice(-5) : []; checkLimit(req); return json(res, 200, await ask(interviewQuestionInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}\n\nPREVIOUS QUESTIONS TO AVOID:\n${prior.length ? prior.map(question => `- ${question}`).join("\n") : "None"}`, "technical_interview_question", interviewQuestionSchema)); }
     if (req.method === "POST" && req.url === "/api/introduction") { requireLiveAnalysis(); const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new HttpError(400, "Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
-    if (req.method === "POST" && req.url === "/api/improve-resume") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); return json(res, 200, await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema)); }
+    if (req.method === "POST" && req.url === "/api/improve-resume") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); const result = await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema); result.bullets = verifyBulletEvidence(result.bullets, resume); return json(res, 200, result); }
     if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "", liveAnalysisEnabled });
     const pathname = req.url === "/" ? "index.html" : normalize(req.url.split("?")[0]).replace(/^[/\\]+/, "");
     const file = join(root, pathname); if (!file.startsWith(root)) return json(res, 403, { error: "Forbidden" });
     const info = await stat(file).catch(() => null); if (!info || !info.isFile()) return json(res, 404, { error: "Not found" });
     res.writeHead(200, { ...securityHeaders, "Content-Type": types[extname(file)] || "application/octet-stream" }); res.end(await readFile(file));
-  } catch (error) { json(res, error instanceof HttpError ? error.status : 500, { error: error.message || "Something went wrong." }); }
+  } catch (error) { if (!(error instanceof HttpError)) console.error("Pathwise request failed:", error); json(res, error instanceof HttpError ? error.status : 500, { error: error instanceof HttpError ? error.message : "Something went wrong. Please try again." }); }
 }).listen(process.env.PORT || 3000, "0.0.0.0", () => console.log(`Pathwise — AI Career Copilot is running at http://localhost:${process.env.PORT || 3000}`));

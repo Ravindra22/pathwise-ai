@@ -1,0 +1,15 @@
+:root {
+  color-scheme: dark;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: #edf2fa;
+  background: #0c1424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; min-height: 100%; background: #0c1424; }
+body { min-width: 320px; min-height: 100vh; margin: 0; background: radial-gradient(ellipse at 50% -24%, rgba(55, 84, 132, .25), transparent 55%), #0c1424; }
+button, textarea { font: inherit; }
+button:focus-visible, a:focus-visible { outline: 2px solid #c5ff84; outline-offset: 3px; }
+::selection { color: #122018; background: #c5ff84; }

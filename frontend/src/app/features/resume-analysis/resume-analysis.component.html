@@ -1,0 +1,60 @@
+<section class="intro">
+  <p class="eyebrow"><span class="spark">✦</span> YOUR NEXT ROLE, WITH CLARITY</p>
+  <h1>Make your experience<br>work for <em>this role.</em></h1>
+  <p class="lede">See where your resume already fits, which requirements need clearer evidence, and what to focus on next.</p>
+</section>
+
+<section class="analysis-layout" aria-label="Resume and role analysis">
+  <form class="analysis-form" [formGroup]="form" (ngSubmit)="analyze()" novalidate>
+    <div class="form-heading"><span class="step">01</span><div><h2>Bring your experience</h2><p>Paste the resume you want to use for this application.</p></div></div>
+    <label for="resume">RESUME TEXT</label>
+    <pw-resume-upload formControlName="resume" (loaded)="updateDraft()" />
+    <textarea id="resume" formControlName="resume" (input)="updateDraft()" rows="11" placeholder="Paste your experience, skills, and accomplishments…"></textarea>
+    @if (form.controls.resume.touched && form.controls.resume.hasError('required')) {
+      <small class="validation">Add your resume before you analyze.</small>
+    }
+    <div class="field-meta"><span>Private until you choose to save</span><span>{{ form.controls.resume.value.length }}/24,000</span></div>
+
+    <div class="form-heading role-heading"><span class="step">02</span><div><h2>Name the opportunity</h2><p>A full job description gives a more useful match.</p></div></div>
+    <label for="job">JOB DESCRIPTION</label>
+    <textarea id="job" formControlName="job" (input)="updateDraft()" rows="9" placeholder="Paste the target job description…"></textarea>
+    @if (form.controls.job.touched && form.controls.job.hasError('required')) {
+      <small class="validation">Add a job description to see relevant requirements.</small>
+    }
+    <div class="field-meta"><span>Role-specific keyword matching</span><span>{{ form.controls.job.value.length }}/24,000</span></div>
+
+    <button class="submit-button" type="submit" [disabled]="loading()">
+      @if (loading()) { Analyzing your fit <span class="spinner" aria-hidden="true"></span> }
+      @else { Analyze this match <span aria-hidden="true">→</span> }
+    </button>
+    @if (errorMessage()) { <p class="error-message" role="alert">{{ errorMessage() }}</p> }
+  </form>
+
+  <aside class="result-panel" aria-live="polite">
+    @if (analysis(); as result) {
+      @if (jobDetailsAreLimited) { <p class="limited-note" role="note"><strong>Limited job details.</strong> This {{ result.score }}/100 fit estimate is based on a short title or description. Paste the full job posting to get a more reliable comparison.</p> }
+      <div class="result-header"><div><p class="eyebrow">YOUR ROLE SNAPSHOT</p><h2>{{ result.label }}</h2></div><div class="fit-score"><strong>{{ result.score }}</strong><span>/100<br>FIT</span></div></div>
+      <div class="score-track" role="meter" aria-label="Resume fit score" [attr.aria-valuenow]="result.score" aria-valuemin="0" aria-valuemax="100"><span [style.width.%]="result.score"></span></div>
+      <div class="insight-block"><p class="eyebrow">YOUR EDGE</p><h3>{{ result.edgeTitle }}</h3><p>{{ result.edgeCopy }}</p>
+        @if (result.matched.length) { <div class="chips"><span class="chip-label">Evidence found</span>@for (term of result.matched; track term) { <span class="chip positive">{{ term }}</span> }</div> }
+      </div>
+      <div class="insight-block gap-block"><p class="eyebrow">MAKE THE EVIDENCE CLEARER</p><h3>{{ result.gapTitle }}</h3><p>{{ result.gapCopy }}</p>
+        @if (result.gaps.length) { <div class="chips"><span class="chip-label">Not found in the provided resume</span>@for (term of result.gaps; track term) { <span class="chip gap">{{ term }}</span> }</div> }
+        <p class="explain">A missing keyword means the resume doesn’t show it clearly. It doesn’t mean you lack that skill.</p>
+      </div>
+      @if (result.roadmap.length) {
+        <div class="next-step"><span class="next-icon">↗</span><div><p class="eyebrow">A PRACTICAL NEXT MOVE</p><h3>{{ result.roadmap[0].title }}</h3><p>{{ result.roadmap[0].detail }}</p></div></div>
+      }
+      <div class="save-row">
+        <a class="save-button improve-link" routerLink="/resume">Improve my resume <span>↗</span></a>
+        <button type="button" class="save-button" (click)="saveCurrent()" [disabled]="saving()">@if (saving()) { Saving… } @else if (activePlanLabel) { Update saved plan <span>↗</span> } @else { Save this plan <span>↗</span> }</button>
+        @if (saveMessage()) { <p class="save-message" role="status">{{ saveMessage() }}</p> }
+        @if (!auth.user()) { <p class="save-help">You’ll be asked to sign in first. Your analysis will be kept while you do.</p> }
+      </div>
+    } @else {
+      <div class="empty-state"><div class="orbit" aria-hidden="true"><span>✦</span><i></i><b></b></div><p class="eyebrow">YOUR CAREER SNAPSHOT</p><h2>Your next step<br>starts with <em>evidence.</em></h2><p>Share a resume and the role you want. Pathwise will surface relevant strengths and areas where the resume could be clearer.</p><div class="empty-foot"><span>RESUME</span><i></i><span>ROLE</span><i></i><span>CLARITY</span></div></div>
+    }
+  </aside>
+</section>
+
+<section class="trust-note"><span class="trust-icon">✓</span><p><strong>Grounded in what you share.</strong> Use supported claims as a starting point. Confirm each suggestion before adding it to an application.</p></section>

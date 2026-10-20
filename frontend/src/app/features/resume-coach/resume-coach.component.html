@@ -1,0 +1,65 @@
+<section class="intro">
+  <a class="back-link" routerLink="/analyze">← Resume match</a>
+  <p class="eyebrow"><span>✦</span> RESUME COACH</p>
+  <h1>Make your story<br><em>clearer and stronger.</em></h1>
+  <p class="lede">Get role-specific edits grounded in your own experience. Every suggestion includes the resume excerpt it draws from.</p>
+</section>
+
+<section class="coach-layout" aria-label="Resume improvement">
+  <form class="coach-form" [formGroup]="form" (ngSubmit)="improve()" novalidate>
+    <div class="section-title"><span>01</span><div><h2>Your experience</h2><p>Paste the resume you want to improve.</p></div></div>
+    <label for="coach-resume">RESUME TEXT</label>
+    <pw-resume-upload formControlName="resume" (loaded)="updateDraft()" />
+    <textarea id="coach-resume" formControlName="resume" (input)="updateDraft()" rows="11" maxlength="24000" placeholder="Paste your experience, skills, and accomplishments…"></textarea>
+    @if (form.controls.resume.touched && form.controls.resume.hasError('required')) { <small class="validation">Add your resume to get grounded suggestions.</small> }
+    <div class="field-meta"><span>Suggestions use only what you share</span><span>{{ form.controls.resume.value.length }}/24,000</span></div>
+
+    <div class="section-title second"><span>02</span><div><h2>Your target role</h2><p>Describe the role you’re applying for.</p></div></div>
+    <label for="coach-job">JOB DESCRIPTION</label>
+    <textarea id="coach-job" formControlName="job" (input)="updateDraft()" rows="7" maxlength="24000" placeholder="Paste the target job description…"></textarea>
+    @if (form.controls.job.touched && form.controls.job.hasError('required')) { <small class="validation">Add a job description for relevant suggestions.</small> }
+    <div class="field-meta"><span>Used to focus the edits</span><span>{{ form.controls.job.value.length }}/24,000</span></div>
+
+    <button class="submit-button" type="submit" [disabled]="loading()">
+      @if (loading()) { Reviewing your resume <span class="spinner" aria-hidden="true"></span> }
+      @else { Suggest improvements <span aria-hidden="true">→</span> }
+    </button>
+    @if (errorMessage()) { <p class="error-message" role="alert">{{ errorMessage() }}</p> }
+    @if (jobDetailsAreLimited) { <p class="limited-form-note">A short role title gives the coach less to work with. Add the full job description for more relevant suggestions.</p> }
+  </form>
+
+  <section class="result-panel" aria-live="polite" aria-label="Resume suggestions">
+    @if (result(); as suggestions) {
+      @if (jobDetailsAreLimited) { <p class="limited-note" role="note"><strong>Limited job details.</strong> These suggestions use only the role title or short description you entered. Add the full job posting and run this again for more targeted edits.</p> }
+      <div class="result-heading"><div><p class="eyebrow">ROLE-ALIGNED DRAFT</p><h2>Your experience, made clearer.</h2></div><span class="draft-mark">✦</span></div>
+      <article class="summary-card"><div class="card-top"><div><p class="eyebrow">PROFESSIONAL SUMMARY</p><p class="summary-copy">{{ suggestions.summary }}</p></div><button class="copy-button" type="button" (click)="copySummary()">{{ copied() ? 'Copied ✓' : 'Copy' }}</button></div><p class="summary-review">AI-generated draft. Check dates, skills, seniority, and every other claim against your actual experience.</p><label class="confirmation"><input type="checkbox" [checked]="summaryReviewed()" (change)="summaryReviewed.set($any($event.target).checked)"><span>I reviewed this summary and confirmed that its claims are accurate.</span></label><button class="insert-button" type="button" [disabled]="!summaryReviewed()" (click)="addReviewedSummary(suggestions.summary)">Add summary to resume draft</button></article>
+      <div class="suggestions-heading"><p class="eyebrow">BULLET IDEAS</p><span>{{ suggestions.bullets.length }} suggestions</span></div>
+      @for (bullet of suggestions.bullets; track $index) {
+        <article class="bullet-card">
+          <div class="bullet-number">{{ ($index + 1).toString().padStart(2, '0') }}</div>
+          <div class="bullet-content"><p class="bullet-text">{{ bullet.text }}</p>
+            @if (bullet.needsInput) { <p class="status needs-input"><span>＋</span> No matching excerpt for every claim. Add or confirm the missing detail first.</p> }
+            @else { <p class="status supported"><span>✓</span> Matching excerpt found; review the full claim before using it</p> }
+            @if (bullet.evidence) { <blockquote>{{ bullet.evidence }}</blockquote> }
+            <label class="confirmation"><input type="checkbox" [checked]="confirmedBullets().has($index)" (change)="confirmBullet($index, $any($event.target).checked)"><span>@if (bullet.needsInput) { I added any missing details and confirmed this bullet is accurate. } @else { I reviewed this bullet and confirmed it is accurate. }</span></label>
+            <button class="insert-button" type="button" [disabled]="!confirmedBullets().has($index)" (click)="insertSuggestion(bullet.text)">Insert bullet at cursor in draft</button>
+          </div>
+        </article>
+      }
+      <section class="draft-editor" aria-label="Editable resume draft">
+        <div class="draft-heading"><div><p class="eyebrow">YOUR EDITABLE DOCUMENT</p><h3>Review your resume draft</h3></div><button class="download-button" type="button" (click)="downloadResume()">Download ATS-friendly Word <span aria-hidden="true">↓</span></button></div>
+        <p class="draft-help">This starts with your original resume. Add the approved summary above, then place the cursor where a confirmed bullet belongs. Download uses a clean, one-column Word layout with standard section headings. Check the final pages and claims before applying.</p>
+        <textarea #resumeDraftEditor class="draft-textarea" [value]="resumeDraft()" (focus)="draftFocused.set(true)" (input)="resumeDraft.set($any($event.target).value)" rows="15" aria-label="Editable resume text"></textarea>
+        @if (draftMessage()) { <p class="draft-message" role="status">{{ draftMessage() }}</p> }
+      </section>
+      @if (suggestions.keywords.length) {
+        <div class="keywords"><p class="eyebrow">ROLE KEYWORDS TO REVIEW</p><div>@for (keyword of suggestions.keywords; track keyword) { <span>{{ keyword }}</span> }</div></div>
+      }
+      <p class="review-note"><strong>Before you use these:</strong> {{ suggestions.note }} Confirm that every claim is accurate and add only details you can support.</p>
+    } @else {
+      <div class="empty-state"><div class="orbit"><span>✦</span><i></i><b></b></div><p class="eyebrow">GOOD EDITS START WITH EVIDENCE</p><h2>Clearer wording.<br><em>Still your story.</em></h2><p>Pathwise will suggest a summary and stronger bullet ideas, then show which words came from your resume and where you need to add a real detail.</p><div class="promise"><span>✓</span> No invented metrics, roles, or qualifications</div></div>
+    }
+  </section>
+</section>
+
+<section class="trust-note"><span>✓</span><p><strong>You stay in control.</strong> These are editing suggestions, not verified facts. Review every sentence before including it in an application.</p></section>

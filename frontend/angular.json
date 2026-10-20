@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "pathwise-angular": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "pw",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/pathwise-angular",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "styles": ["src/styles.css"],
+            "allowedCommonJsDependencies": ["jszip"],
+            "assets": [
+              { "glob": "pdf.worker.min.mjs", "input": "node_modules/pdfjs-dist/build", "output": "assets/pdfjs" }
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "600kB", "maximumError": "1MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "8kB", "maximumError": "12kB" }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "pathwise-angular:build:production" },
+            "development": { "buildTarget": "pathwise-angular:build:development" }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}

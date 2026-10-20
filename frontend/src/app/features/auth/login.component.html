@@ -1,0 +1,37 @@
+<section class="auth-layout">
+  <aside class="auth-story">
+    <p class="eyebrow">A PERSONAL SPACE FOR YOUR NEXT MOVE</p>
+    <h1>Your path,<br>kept <em>in view.</em></h1>
+    <p>Save the roles you’re working toward and return to your plan whenever you’re ready.</p>
+    <div class="story-marks"><span>01&nbsp; MATCH</span><i></i><span>02&nbsp; IMPROVE</span><i></i><span>03&nbsp; MOVE</span></div>
+  </aside>
+  <section class="auth-card" aria-labelledby="auth-title">
+    @if (!auth.ready()) {
+      <p class="eyebrow">CONNECTING YOUR ACCOUNT</p><h2 id="auth-title">One moment…</h2><div class="loading-line" aria-hidden="true"></div>
+    } @else if (auth.configError()) {
+      <p class="eyebrow">ACCOUNT SETUP</p><h2 id="auth-title">Sign-in is unavailable.</h2><p class="card-copy">{{ auth.configError() }}</p>
+    } @else {
+      <p class="eyebrow">PATHWISE ACCOUNT</p>
+      <h2 id="auth-title">@switch (mode()) { @case ('signup') { Start your path. } @case ('forgot') { Reset your password. } @case ('reset') { Choose a new password. } @default { Welcome back. } }</h2>
+      <p class="card-copy">@switch (mode()) { @case ('signup') { Create an account to save your plans and come back to them. } @case ('forgot') { We’ll send a reset link if this email belongs to an account. } @case ('reset') { Choose a new password for your Pathwise account. } @default { Sign in to revisit your career plans. } }</p>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (mode() === 'signup') {
+          <div class="name-fields"><label>FIRST NAME<input formControlName="firstName" autocomplete="given-name" placeholder="First name"></label><label>LAST NAME<input formControlName="lastName" autocomplete="family-name" placeholder="Last name"></label></div>
+        }
+        @if (mode() !== 'reset') {
+          <label>EMAIL ADDRESS<input formControlName="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+          @if (form.controls.email.touched && form.controls.email.invalid) { <small class="validation">Enter a valid email address.</small> }
+        }
+        @if (mode() !== 'forgot') {
+          <label>PASSWORD<input formControlName="password" type="password" [autocomplete]="mode() === 'signin' ? 'current-password' : 'new-password'" placeholder="At least 6 characters" minlength="6" required></label>
+          @if (mode() === 'reset') { <label>CONFIRM PASSWORD<input formControlName="confirmPassword" type="password" autocomplete="new-password" placeholder="Enter it again" required></label> }
+          @if (mode() === 'signin') { <button class="text-link forgot" type="button" (click)="setMode('forgot')">Forgot password?</button> }
+        }
+        <button class="auth-submit" type="submit" [disabled]="loading() || !auth.ready()">@if (loading()) { Please wait… } @else { @switch (mode()) { @case ('signup') { Create account <span>→</span> } @case ('forgot') { Send reset link <span>→</span> } @case ('reset') { Save new password <span>→</span> } @default { Sign in <span>→</span> } } }</button>
+      </form>
+      @if (message()) { <p class="message" [class.error]="messageType() === 'error'" [class.success]="messageType() === 'success'" role="status">{{ message() }}</p> }
+      @if (mode() !== 'reset' && mode() !== 'forgot') { <p class="switch-mode">{{ mode() === 'signup' ? 'Already have an account?' : 'New to Pathwise?' }} <button class="text-link" type="button" (click)="setMode(mode() === 'signup' ? 'signin' : 'signup')">{{ mode() === 'signup' ? 'Sign in' : 'Create an account' }}</button></p> }
+    }
+    <a class="back-link" routerLink="/analyze">← Back to resume match</a>
+  </section>
+</section>
