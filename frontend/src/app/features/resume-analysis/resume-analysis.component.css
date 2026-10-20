@@ -6,6 +6,12 @@ h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 16px; color: #f4f7fc; font: 500 clamp(42px, 6vw, 68px)/.99 'Fraunces', Georgia, serif; letter-spacing: -2.2px; }
 h1 em, .empty-state h2 em { color: #c5ff84; font-style: normal; }
 .lede { max-width: 560px; margin: 0 auto; color: #aab6ca; font-size: 15px; line-height: 1.65; }
+.new-resume-prompt { display: flex; align-items: center; justify-content: space-between; gap: 15px; max-width: 710px; margin: 0 auto 18px; padding: 13px 16px; border: 1px solid rgba(197,255,132,.17); border-radius: 9px; background: rgba(197,255,132,.04); }
+.new-resume-prompt div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+.new-resume-prompt strong { color: #e4eccf; font-size: 11px; }
+.new-resume-prompt div span { color: #9eabc0; font-size: 10px; }
+.new-resume-prompt a { flex: 0 0 auto; color: #c5ff84; font-size: 10px; font-weight: 700; text-decoration: none; }
+.new-resume-prompt a span { margin-left: 4px; }
 .analysis-layout { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: stretch; gap: 22px; }
 .analysis-form, .result-panel { border: 1px solid rgba(190, 205, 228, .15); border-radius: 14px; background: linear-gradient(150deg, rgba(23, 35, 61, .97), rgba(14, 22, 40, .97)); box-shadow: 0 22px 52px rgba(0, 0, 0, .19); }
 .analysis-form { padding: 25px; }
@@ -70,4 +76,4 @@ textarea:focus { border-color: rgba(197, 255, 132, .65); box-shadow: 0 0 0 3px r
 .save-message { display: inline-block; margin: 0 0 0 12px; color: #b7ed96; font-size: 10px; }
 .save-help { margin: 8px 0 0; color: #8492a8; font-size: 10px; line-height: 1.45; }
 @media (max-width: 860px) { .analysis-layout { grid-template-columns: 1fr; }.result-panel { min-height: 400px; }.empty-state { min-height: 365px; } }
-@media (max-width: 600px) { :host { padding-top: 32px; }.intro { margin-bottom: 26px; } h1 { letter-spacing: -1.4px; }.lede { font-size: 13px; }.analysis-form, .result-panel { padding: 19px; }.result-panel { min-height: 390px; }.empty-state { min-height: 350px; padding: 8px 4px; }.empty-state h2 { font-size: 36px; } }
+@media (max-width: 600px) { :host { padding-top: 32px; }.intro { margin-bottom: 26px; } h1 { letter-spacing: -1.4px; }.lede { font-size: 13px; }.new-resume-prompt { align-items: flex-start; flex-direction: column; margin-bottom: 14px; }.analysis-form, .result-panel { padding: 19px; }.result-panel { min-height: 390px; }.empty-state { min-height: 350px; padding: 8px 4px; }.empty-state h2 { font-size: 36px; } }

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { AnalyzeRequest, CareerAnalysis } from '../models/career-analysis';
 import { ResumeImprovement } from '../models/resume-improvement';
 import { CareerIntroduction, InterviewFeedback, InterviewQuestion } from '../models/interview-prep';
+import { ResumeBuilderRequest, ResumeBuilderResult } from '../models/resume-builder';
 
 @Injectable({ providedIn: 'root' })
 export class CareerApiService {
@@ -15,6 +16,10 @@ export class CareerApiService {
 
   improveResume(request: AnalyzeRequest): Observable<ResumeImprovement> {
     return this.http.post<ResumeImprovement>('/api/improve-resume', request);
+  }
+
+  createResume(request: ResumeBuilderRequest): Observable<ResumeBuilderResult> {
+    return this.http.post<ResumeBuilderResult>('/api/create-resume', request);
   }
 
   interviewQuestion(request: AnalyzeRequest & { previousQuestions: string[] }): Observable<InterviewQuestion> {

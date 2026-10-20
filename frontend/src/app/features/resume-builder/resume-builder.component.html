@@ -1,0 +1,61 @@
+<section class="intro">
+  <a class="back-link" routerLink="/analyze">← Resume match</a>
+  <p class="eyebrow"><span>✦</span> STARTING FROM SCRATCH</p>
+  <h1>Your experience<br><em>belongs on a resume.</em></h1>
+  <p class="lede">Answer a few plain-language questions. You don’t need a previous resume, formal job titles, or perfect wording.</p>
+</section>
+
+<div class="progress" aria-label="Resume builder progress">
+  <div class="progress-track"><span [style.width.%]="step() * 33.333"></span></div>
+  <div class="progress-labels"><span [class.current]="step() === 1">01 <b>About you</b></span><span [class.current]="step() === 2">02 <b>Your experience</b></span><span [class.current]="step() === 3">03 <b>Your resume</b></span></div>
+</div>
+
+<main class="builder-card">
+  @if (step() === 1) {
+    <form [formGroup]="form" (ngSubmit)="continueToDetails()" novalidate>
+      <div class="step-heading"><span>01</span><div><p class="eyebrow">FIRST, THE BASICS</p><h2>What job do you want?</h2><p>We’ll shape the resume toward this kind of work.</p></div></div>
+      <div class="form-grid">
+        <div class="field full"><label for="builder-name">YOUR NAME <i>Required</i></label><input id="builder-name" formControlName="name" maxlength="120" autocomplete="name" placeholder="e.g. Jordan Lee">@if (form.controls.name.touched && form.controls.name.hasError('required')) { <small class="error">Enter the name you want on your resume.</small> }</div>
+        <div class="field"><label for="builder-email">EMAIL <i>Optional</i></label><input id="builder-email" type="email" formControlName="email" maxlength="254" autocomplete="email" placeholder="you@example.com">@if (form.controls.email.touched && form.controls.email.invalid) { <small class="error">Check that this email address looks right.</small> }</div>
+        <div class="field"><label for="builder-phone">PHONE <i>Optional</i></label><input id="builder-phone" type="tel" formControlName="phone" maxlength="60" autocomplete="tel" placeholder="Your phone number"></div>
+        <div class="field"><label for="builder-location">CITY / AREA <i>Optional</i></label><input id="builder-location" formControlName="location" maxlength="120" autocomplete="address-level2" placeholder="e.g. Atlanta, GA"></div>
+        <div class="field"><label for="builder-role">JOB YOU WANT <i>Required</i></label><input id="builder-role" formControlName="targetRole" maxlength="180" placeholder="e.g. Package return associate">@if (form.controls.targetRole.touched && form.controls.targetRole.hasError('required')) { <small class="error">Tell us the kind of job you want.</small> }</div>
+        <div class="field"><label for="builder-employer">COMPANY <i>Optional</i></label><input id="builder-employer" formControlName="employer" maxlength="180" placeholder="e.g. UPS"></div>
+        <div class="field full"><label for="builder-posting">JOB POSTING <i>Optional</i></label><textarea id="builder-posting" formControlName="jobDescription" rows="4" maxlength="10000" placeholder="Paste the job ad if you have it. We’ll use it to focus the wording."></textarea><small class="hint">No job ad? That’s okay. The job title is enough to get started.</small></div>
+      </div>
+      <div class="actions"><span class="privacy-note">Your answers are sent to AI only when you create the resume.</span><button class="primary" type="submit">Continue <span aria-hidden="true">→</span></button></div>
+    </form>
+  }
+
+  @if (step() === 2) {
+    <form [formGroup]="form" (ngSubmit)="generate()" novalidate>
+      <div class="step-heading"><span>02</span><div><p class="eyebrow">TELL US WHAT YOU CAN DO</p><h2>Experience comes in many forms.</h2><p>Paid work, helping family, side jobs, volunteering, school, and skills all count.</p></div></div>
+      <div class="field full"><label for="builder-experience">WORK OR TASKS YOU’VE DONE <i>Optional</i></label><textarea id="builder-experience" formControlName="experience" rows="5" maxlength="7000" placeholder="Where have you worked or helped out? What did you do? Approximate dates are okay, and dates are not required."></textarea><small class="hint">Example: Helped at my uncle’s shop on weekends. Greeted customers, organized items, and kept the counter tidy.</small></div>
+
+      <fieldset class="skill-picker"><legend>THINGS YOU CAN DO <i>Optional</i></legend><p>Select only skills or tasks that are true for you. You can choose more than one.</p><div class="skill-grid">
+        @for (skill of quickSkills; track skill) { <label class="skill-option"><input type="checkbox" [checked]="selectedSkills().has(skill)" (change)="toggleSkill(skill, $any($event.target).checked)"><span>{{ skill }}</span></label> }
+      </div></fieldset>
+      <div class="field full"><label for="builder-skills">OTHER SKILLS <i>Optional</i></label><textarea id="builder-skills" formControlName="extraSkills" rows="3" maxlength="3000" placeholder="Add tools, languages, or other things you know how to do."></textarea><small class="hint">Example: Spanish and English; Microsoft Word; basic hand tools.</small></div>
+      <div class="field full"><label for="builder-training">SCHOOL, COURSES, OR LICENSES <i>Optional</i></label><textarea id="builder-training" formControlName="training" rows="3" maxlength="5000" placeholder="School, training, certificates, or licenses you’ve completed."></textarea><small class="hint">Only add certificates or licenses you actually have.</small></div>
+      <div class="field full"><label for="builder-other">OTHER EXPERIENCE <i>Optional</i></label><textarea id="builder-other" formControlName="otherExperience" rows="3" maxlength="5000" placeholder="Volunteer work, helping at home, community activities, or projects."></textarea></div>
+      @if (detailsError()) { <p class="error-banner" role="alert">{{ detailsError() }}</p> }
+      @if (errorMessage()) { <p class="error-banner" role="alert">{{ errorMessage() }}</p> }
+      <div class="actions"><button class="secondary" type="button" (click)="back()">← Back</button><button class="primary" type="submit" [disabled]="loading()">@if (loading()) { Writing your resume <span class="spinner" aria-hidden="true"></span> } @else { Create my resume <span aria-hidden="true">✦</span> }</button></div>
+    </form>
+  }
+
+  @if (step() === 3) {
+    @if (result(); as draft) {
+      <div class="step-heading"><span>03</span><div><p class="eyebrow">YOUR FIRST DRAFT</p><h2>Review it, make it yours.</h2><p>We used the details you shared. Edit anything that needs changing before you download.</p></div></div>
+      <div class="draft-note"><span aria-hidden="true">✦</span><p>{{ draft.note }} Make sure every detail is accurate. Add or change anything you want in the editor.</p></div>
+      <label class="draft-label" for="resume-result">EDIT YOUR RESUME</label>
+      <textarea id="resume-result" class="resume-editor" [value]="resumeDraft()" (input)="editResume($any($event.target).value)" rows="20" aria-label="Editable resume draft"></textarea>
+      <label class="review-check"><input type="checkbox" [checked]="confirmed()" (change)="confirmed.set($any($event.target).checked)"><span>I checked this resume and confirm the information is true.</span></label>
+      <p class="download-help">Downloads as an editable Word file in a clean, one-column layout.</p>
+      <p class="download-message" role="status">{{ downloadMessage() }}</p>
+      <div class="actions"><button class="secondary" type="button" (click)="back()">← Edit my answers</button><button class="primary" type="button" [disabled]="!confirmed() || !resumeDraft().trim()" (click)="download()">Download my resume <span aria-hidden="true">↓</span></button></div>
+    }
+  }
+</main>
+
+<p class="trust-note"><span>✓</span> Pathwise can help with the wording. It will not add jobs, skills, training, or achievements you didn’t provide.</p>

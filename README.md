@@ -58,7 +58,7 @@ The app keeps the OpenAI API key server-side, applies text-size and request limi
 
 ## Angular career copilot (migration preview)
 
-The Angular application lives in [`frontend/`](frontend/). It is an incremental migration preview; the existing app at port 3000 remains available. It includes resume-to-role analysis, PDF/DOCX/TXT/MD resume upload or paste, evidence-grounded resume suggestions, editable resume drafts with a one-column ATS-friendly Word export, saved plans, and interview practice with a tailored introduction.
+The Angular application lives in [`frontend/`](frontend/). It is an incremental migration preview; the existing app at port 3000 remains available. It includes resume-to-role analysis, a guided resume builder for people starting from scratch, PDF/DOCX/TXT/MD resume upload or paste, evidence-grounded resume suggestions, editable resume drafts with a one-column ATS-friendly Word export, saved plans, and interview practice with a tailored introduction.
 
 Resume files are parsed in the browser (PDF and DOCX require their local parser chunks). Extracted text is placed into an editable field and is sent to the API only when the user submits an analysis or coaching request.
 

@@ -76,6 +76,7 @@ const interviewInstruction = `You are a kind, specific interview coach. Evaluate
 const interviewQuestionInstruction = `You are a practical technical interviewer. Write exactly one concise, open-ended technical interview question based on the candidate's resume and target role. Focus on a technology, system, or skill explicitly mentioned in the resume or target role. Prefer a realistic design, debugging, trade-off, or implementation question. Do not ask a trick question, do not invent experience, and do not add an answer. If previous questions are provided, choose a clearly different technology or angle and never repeat one. Follow the response schema exactly.`;
 const introductionInstruction = `You are a career coach. Write a warm, confident first-person “tell me about yourself” introduction based only on the candidate's résumé and target role. The audience will be provided as recruiter, hiring manager, or technical interviewer. Do not invent experience. Keep it natural, concise, and easy to say aloud. Follow the response schema exactly.`;
 const resumeImprovementInstruction = `You are a precise résumé coach. Based only on the provided résumé and target role, suggest an improved professional summary, three to five stronger résumé bullet ideas, and relevant role keywords. Never invent employers, titles, projects, skills, metrics, or accomplishments. For each bullet, provide an exact short evidence excerpt copied from the résumé that supports its factual claims. If a claim has no direct evidence in the résumé, explicitly set needsInput true and use a placeholder such as [add your actual metric] rather than inventing a detail. Remind the user to review every suggestion for accuracy. Follow the response schema exactly.`;
+const resumeBuilderInstruction = `You are Pathwise, a careful resume writing assistant for people applying to professional, hourly, trade, and entry-level work. Create a clear, concise, ATS-friendly one-column resume using only the supplied candidate information. Never invent dates, employers, job titles, duties, skills, credentials, education, results, or personal qualities. Treat checked capabilities as facts the candidate confirms, but list them as skills unless work history explicitly supports that they were used in a job. Rewrite supplied facts for clarity without changing their meaning. Tailor wording to the target role and optional job posting while never adding qualifications just because a posting asks for them. Omit empty sections and unknown details; do not add generic filler, objective clichés, or placeholders. Include the supplied name and only the contact/location details provided. Use plain-text section headings and concise bullet points. If information is limited, create the most useful honest draft possible and explain what details the candidate could add in note. Return a resume draft and a short note reminding them to check accuracy. Follow the response schema exactly.`;
 const analysisSchema = {
   type: "object", additionalProperties: false,
   properties: {
@@ -108,6 +109,18 @@ const resumeImprovementSchema = {
   properties: { summary: { type: "string" }, bullets: { type: "array", items: { type: "object", additionalProperties: false, properties: { text: { type: "string" }, evidence: { type: "string" }, needsInput: { type: "boolean" } }, required: ["text", "evidence", "needsInput"] } }, keywords: { type: "array", items: { type: "string" } }, note: { type: "string" } },
   required: ["summary", "bullets", "keywords", "note"]
 };
+const resumeBuilderSchema = {
+  type: "object", additionalProperties: false,
+  properties: { resume: { type: "string" }, note: { type: "string" } },
+  required: ["resume", "note"]
+};
+
+function optionalText(value, name, max = 7000) {
+  if (value === undefined || value === null) return "";
+  if (typeof value !== "string") throw new HttpError(400, `${name} must be text.`);
+  if (value.length > max) throw new HttpError(400, `${name} is too long.`);
+  return value.trim();
+}
 
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json" };
 createServer(async (req, res) => {
@@ -117,6 +130,32 @@ createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/interview-question") { requireLiveAnalysis(); const { resume, job, previousQuestions = [] } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); const prior = Array.isArray(previousQuestions) ? previousQuestions.filter(question => typeof question === "string").slice(-5) : []; checkLimit(req); return json(res, 200, await ask(interviewQuestionInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}\n\nPREVIOUS QUESTIONS TO AVOID:\n${prior.length ? prior.map(question => `- ${question}`).join("\n") : "None"}`, "technical_interview_question", interviewQuestionSchema)); }
     if (req.method === "POST" && req.url === "/api/introduction") { requireLiveAnalysis(); const { resume, job, kind } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); if (!["recruiter", "manager", "technical"].includes(kind)) throw new HttpError(400, "Choose an introduction type."); checkLimit(req); return json(res, 200, await ask(introductionInstruction, `AUDIENCE: ${kind}\n\nRESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "career_introduction", introductionSchema)); }
     if (req.method === "POST" && req.url === "/api/improve-resume") { requireLiveAnalysis(); const { resume, job } = await readBody(req); requireText(resume, "Resume"); requireText(job, "Target role"); checkLimit(req); const result = await ask(resumeImprovementInstruction, `RESUME:\n${resume}\n\nTARGET ROLE:\n${job}`, "resume_improvement", resumeImprovementSchema); result.bullets = verifyBulletEvidence(result.bullets, resume); return json(res, 200, result); }
+    if (req.method === "POST" && req.url === "/api/create-resume") {
+      requireLiveAnalysis();
+      const input = await readBody(req);
+      const name = optionalText(input.name, "Name", 120);
+      const targetRole = optionalText(input.targetRole, "Target role", 180);
+      requireText(name, "Name"); requireText(targetRole, "Target role");
+      const details = {
+        email: optionalText(input.email, "Email", 254),
+        phone: optionalText(input.phone, "Phone", 60),
+        location: optionalText(input.location, "Location", 120),
+        employer: optionalText(input.employer, "Target company", 180),
+        jobDescription: optionalText(input.jobDescription, "Job posting", 10000),
+        experience: optionalText(input.experience, "Work and practical experience"),
+        skills: optionalText(input.skills, "Skills and tasks", 5000),
+        training: optionalText(input.training, "Education and training", 5000),
+        otherExperience: optionalText(input.otherExperience, "Other experience", 5000)
+      };
+      if (![details.experience, details.skills, details.training, details.otherExperience].some(Boolean)) {
+        throw new HttpError(400, "Add at least one work example, skill, course, or other experience.");
+      }
+      const payload = { name, targetRole, ...details };
+      if (JSON.stringify(payload).length > MAX_CHARS) throw new HttpError(400, "Please shorten the information and try again.");
+      checkLimit(req);
+      const result = await ask(resumeBuilderInstruction, JSON.stringify(payload), "resume_builder", resumeBuilderSchema);
+      return json(res, 200, result);
+    }
     if (req.method === "GET" && req.url === "/api/config") return json(res, 200, { supabaseUrl: process.env.SUPABASE_URL || "", supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || "", liveAnalysisEnabled });
     const pathname = req.url === "/" ? "index.html" : normalize(req.url.split("?")[0]).replace(/^[/\\]+/, "");
     const file = join(root, pathname); if (!file.startsWith(root)) return json(res, 403, { error: "Forbidden" });
